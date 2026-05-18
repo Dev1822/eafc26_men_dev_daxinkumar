@@ -12,11 +12,9 @@ const playerSchema = new mongoose.Schema({
     dri: { type: Number },
     def: { type: Number },
     phy: { type: Number },
-    
     // Pace stats
     acceleration: { type: Number },
     sprintSpeed: { type: Number },
-    
     // Shooting stats
     positioning: { type: Number },
     finishing: { type: Number },
