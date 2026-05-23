@@ -24,9 +24,11 @@ const getPlayerById = async (req, res) => {
         res.status(500).json({ message: 'Server Error fetching player details' });
     }
 };
+
 const createPlayer = async (req, res) => {
     try {
-        const { Id, name } = req.body;
+        const Id = req.body.Id;
+        const name = req.body.name;
 
         if (!Id || !name) {
             return res.status(400).json({ message: 'Both Id and name are required' });
@@ -90,10 +92,46 @@ const replacePlayer = async (req, res) => {
         res.status(500).json({ message: 'Server Error replacing player record' });
     }
 };
+const updatePlayer = async (req, res) => {
+    try {
+        const updateData = { ...req.body };
+        delete updateData._id;
+
+        const playerToUpdate = await Player.findById(req.params.id);
+        if (!playerToUpdate) {
+            return res.status(404).json({ message: 'Player not found' });
+        }
+
+        if (updateData.Id && updateData.Id !== playerToUpdate.Id) {
+            const existingConflict = await Player.findOne({ Id: updateData.Id });
+            if (existingConflict) {
+                return res.status(409).json({ message: `Player with Id '${updateData.Id}' already exists` });
+            }
+        }
+
+        const updatedPlayer = await Player.findByIdAndUpdate(
+            req.params.id,
+            { $set: updateData },
+            { new: true, runValidators: true }
+        );
+
+        res.json(updatedPlayer);
+    } catch (error) {
+        console.error(error);
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: error.message });
+        }
+        if (error.name === 'CastError') {
+            return res.status(400).json({ message: 'Invalid player ID format' });
+        }
+        res.status(500).json({ message: 'Server Error updating player record' });
+    }
+};
 
 module.exports = {
     getPlayers,
     getPlayerById,
     createPlayer,
-    replacePlayer
+    replacePlayer,
+    updatePlayer
 };
