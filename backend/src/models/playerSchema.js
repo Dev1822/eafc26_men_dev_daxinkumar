@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const playerSchema = new mongoose.Schema({
-    externalId: { type: String, required: true, unique: true },
+    Id: { type: String, required: true, unique: true },
     rank: { type: Number },
     name: { type: String, required: true, index: true },
     gender: { type: String, enum: ['M', 'F'] },
