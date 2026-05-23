@@ -1,4 +1,5 @@
 const Player = require('../models/playerSchema');
+const mongoose = require('mongoose');
 
 const getPlayers = async (req, res) => {
     try {
@@ -25,6 +26,31 @@ const getPlayerById = async (req, res) => {
     }
 };
 
+const checkPlayerExists = async (req, res) => {
+    try {
+        const player = await Player.findById(req.params.id);
+
+        if (player) {
+            return res.status(200).json({
+                exists: true,
+                message: "Player exists"
+            });
+        }
+
+        return res.status(404).json({
+            exists: false,
+            message: "Player does not exist"
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            message: "Server error fetching player details"
+        });
+    }
+};
+
 const createPlayer = async (req, res) => {
     try {
         const Id = req.body.Id || req.body.ID || req.body.id;
@@ -48,13 +74,34 @@ const createPlayer = async (req, res) => {
         res.status(201).json(savedPlayer);
     } catch (error) {
         console.error(error);
-        if (error.name === 'ValidationError') {
-            return res.status(400).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
+    }
+};
+
+const bulkCreatePlayers = async (req, res) => {
+    try {
+        const { players } = req.body;
+
+        if (!Array.isArray(players) || players.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Players array is required and cannot be empty"
+            });
         }
-        if (error.code === 11000) {
-            return res.status(409).json({ message: 'Player with this Id already exists' });
-        }
-        res.status(500).json({ message: 'Server Error creating player' });
+
+        const newPlayers = await Player.insertMany(players);
+
+        res.status(201).json({
+            success: true,
+            message: `${players.length} players created successfully`,
+            data: newPlayers
+        });
+
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
     }
 };
 
@@ -67,80 +114,122 @@ const replacePlayer = async (req, res) => {
             return res.status(400).json({ message: 'Both Id and name are required' });
         }
 
-        const playerToReplace = await Player.findById(req.params.id);
-        if (!playerToReplace) {
-            return res.status(404).json({ message: 'Player not found' });
-        }
-
-        if (Id !== playerToReplace.Id) {
-            const existingConflict = await Player.findOne({ Id });
-            if (existingConflict) {
-                return res.status(409).json({ message: `Player with Id '${Id}' already exists` });
-            }
-        }
-
-        const replacedPlayer = await Player.findOneAndReplace(
-            { _id: req.params.id },
-            {
-                ...req.body,
-                Id,
-                name
-            },
-            { new: true, runValidators: true }
+        const updatedPlayer = await Player.findByIdAndUpdate(
+            Id,
+            name,
+            req.body,
+            { new: true, overwrite: true, runValidators: true }
         );
 
-        res.json(replacedPlayer);
+        if (!updatedPlayer) {
+            return res.status(404).json({
+                success: false,
+                message: "Player not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Player replaced successfully",
+            data: updatedPlayer
+        });
     } catch (error) {
         console.error(error);
-        if (error.name === 'ValidationError') {
-            return res.status(400).json({ message: error.message });
-        }
-        if (error.name === 'CastError') {
-            return res.status(400).json({ message: 'Invalid player ID format' });
-        }
-        res.status(500).json({ message: 'Server Error replacing player record' });
+        return res.status(400).json({ message: error.message });
     }
 };
 
 const updatePlayer = async (req, res) => {
     try {
-        const updateData = { ...req.body };
-        delete updateData._id;
+        const { id } = req.params;
 
-        const Id = updateData.Id || updateData.ID || updateData.id;
-        const name = updateData.name || updateData.Name;
-
-        if (Id) updateData.Id = Id;
-        if (name) updateData.name = name;
-
-        const playerToUpdate = await Player.findById(req.params.id);
-        if (!playerToUpdate) {
-            return res.status(404).json({ message: 'Player not found' });
+         
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid ID format"
+            });
         }
 
-        if (updateData.Id && updateData.Id !== playerToUpdate.Id) {
-            const existingConflict = await Player.findOne({ Id: updateData.Id });
-            if (existingConflict) {
-                return res.status(409).json({ message: `Player with Id '${updateData.Id}' already exists` });
-            }
+        if (!req.body || Object.keys(req.body).length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "No fields provided to update"
+            });
         }
 
         const updatedPlayer = await Player.findByIdAndUpdate(
-            req.params.id,
-            { $set: updateData },
+            id,
+            req.body,
             { new: true, runValidators: true }
         );
 
-        res.json(updatedPlayer);
+        if (!updatedPlayer) {
+            return res.status(404).json({
+                success: false,
+                message: "Player not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Player updated successfully",
+            data: updatedPlayer
+        });
+
     } catch (error) {
         console.error(error);
-        if (error.name === 'ValidationError') {
-            return res.status(400).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
+    }
+};
+
+const bulkUpdatePlayers = async (req, res) => {
+    try {
+        const { ids, updateData } = req.body;
+
+        if (!ids || !Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "IDs array is required and cannot be empty"
+            });
         }
-        if (error.name === 'CastError') {
-            return res.status(400).json({ message: 'Invalid player ID format' });
+
+        if (!updateData || Object.keys(updateData).length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "No update fields provided"
+            });
         }
-        res.status(500).json({ message: 'Server Error updating player record' });
+
+        for (const id of ids) {
+            if (!mongoose.Types.ObjectId.isValid(id)) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Invalid player ID: ${id}`
+                });
+            }
+        }
+
+        const result = await Player.updateMany(
+            {
+                _id: { $in: ids }
+            },
+            {
+                $set: updateData
+            },
+            {
+                runValidators: true
+            }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Players updated successfully",
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json({ message: error.message });
     }
 };
 
@@ -155,18 +244,57 @@ const deletePlayer = async (req, res) => {
         }
     } catch (error) {
         console.error(error);
-        if (error.name === 'CastError') {
-            return res.status(400).json({ message: 'Invalid player ID format' });
+        return res.status(400).json({ message: error.message });
+    }
+};
+
+const bulkDeletePlayers = async (req, res) => {
+    try {
+        const { ids } = req.body;
+
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "IDs array is required and cannot be empty"
+            });
         }
-        res.status(500).json({ message: 'Server Error deleting player' });
+
+        const validIds = ids.filter(id =>
+            mongoose.Types.ObjectId.isValid(id)
+        );
+
+        if (validIds.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "No valid IDs provided"
+            });
+        }
+
+        const result = await Player.deleteMany({
+            _id: { $in: validIds }
+        });
+
+        res.status(200).json({
+            success: true,
+            message: `Players deleted successfully`,
+            data: null
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json({ message: error.message });
     }
 };
 
 module.exports = {
     getPlayers,
     getPlayerById,
+    checkPlayerExists,
     createPlayer,
+    bulkCreatePlayers,
     replacePlayer,
     updatePlayer,
-    deletePlayer
+    bulkUpdatePlayers,
+    deletePlayer,
+    bulkDeletePlayers
 };
