@@ -27,8 +27,8 @@ const getPlayerById = async (req, res) => {
 
 const createPlayer = async (req, res) => {
     try {
-        const Id = req.body.Id;
-        const name = req.body.name;
+        const Id = req.body.Id || req.body.ID || req.body.id;
+        const name = req.body.name || req.body.Name;
 
         if (!Id || !name) {
             return res.status(400).json({ message: 'Both Id and name are required' });
@@ -39,7 +39,11 @@ const createPlayer = async (req, res) => {
             return res.status(409).json({ message: `Player with Id '${Id}' already exists` });
         }
 
-        const newPlayer = new Player(req.body);
+        const newPlayer = new Player({
+            ...req.body,
+            Id,
+            name
+        });
         const savedPlayer = await newPlayer.save();
         res.status(201).json(savedPlayer);
     } catch (error) {
@@ -56,7 +60,8 @@ const createPlayer = async (req, res) => {
 
 const replacePlayer = async (req, res) => {
     try {
-        const { Id, name } = req.body;
+        const Id = req.body.Id || req.body.ID || req.body.id;
+        const name = req.body.name || req.body.Name;
 
         if (!Id || !name) {
             return res.status(400).json({ message: 'Both Id and name are required' });
@@ -76,7 +81,11 @@ const replacePlayer = async (req, res) => {
 
         const replacedPlayer = await Player.findOneAndReplace(
             { _id: req.params.id },
-            req.body,
+            {
+                ...req.body,
+                Id,
+                name
+            },
             { new: true, runValidators: true }
         );
 
@@ -92,10 +101,17 @@ const replacePlayer = async (req, res) => {
         res.status(500).json({ message: 'Server Error replacing player record' });
     }
 };
+
 const updatePlayer = async (req, res) => {
     try {
         const updateData = { ...req.body };
         delete updateData._id;
+
+        const Id = updateData.Id || updateData.ID || updateData.id;
+        const name = updateData.name || updateData.Name;
+
+        if (Id) updateData.Id = Id;
+        if (name) updateData.name = name;
 
         const playerToUpdate = await Player.findById(req.params.id);
         if (!playerToUpdate) {
@@ -128,10 +144,29 @@ const updatePlayer = async (req, res) => {
     }
 };
 
+const deletePlayer = async (req, res) => {
+    try {
+        const player = await Player.findByIdAndDelete(req.params.id);
+        
+        if (player) {
+            res.json({ message: 'Player record deleted successfully', player });
+        } else {
+            res.status(404).json({ message: 'Player not found' });
+        }
+    } catch (error) {
+        console.error(error);
+        if (error.name === 'CastError') {
+            return res.status(400).json({ message: 'Invalid player ID format' });
+        }
+        res.status(500).json({ message: 'Server Error deleting player' });
+    }
+};
+
 module.exports = {
     getPlayers,
     getPlayerById,
     createPlayer,
     replacePlayer,
-    updatePlayer
+    updatePlayer,
+    deletePlayer
 };
