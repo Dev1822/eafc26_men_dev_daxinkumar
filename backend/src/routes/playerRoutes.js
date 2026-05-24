@@ -23,7 +23,12 @@ const {
     getPlayersByAge,
     getPlayersByGender,
     getPlayersByPlaystyle,
-    getPlayersByPreferredFoot
+    getPlayersByPreferredFoot,
+    getPlayersByAlternativePosition,
+    getTopRatedPlayers,
+    getTopPacedPlayers,
+    getTopDribblers,
+    getTopFinishers
 } = require('../controllers/informationController');
 
 router.route('/exists/:id').get(checkPlayerExists);
@@ -41,6 +46,11 @@ router.route('/age/:age').get(getPlayersByAge);
 router.route('/gender/:gender').get(getPlayersByGender);
 router.route('/playstyle/:style').get(getPlayersByPlaystyle);
 router.route('/preferred-foot/:foot').get(getPlayersByPreferredFoot);
+router.route('/alternative-position/:position').get(getPlayersByAlternativePosition);
+router.route('/top-rated').get(getTopRatedPlayers);
+router.route('/top-paced').get(getTopPacedPlayers);
+router.route('/top-dribblers').get(getTopDribblers);
+router.route('/top-finishers').get(getTopFinishers);
 
 router.route('/')
     .get(getPlayers)

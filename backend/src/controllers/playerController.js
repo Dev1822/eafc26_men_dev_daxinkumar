@@ -185,51 +185,40 @@ const updatePlayer = async (req, res) => {
 
 const bulkUpdatePlayers = async (req, res) => {
     try {
-        const { ids, updateData } = req.body;
+        const players = req.body;
 
-        if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        if (!Array.isArray(players) || players.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: "IDs array is required and cannot be empty"
+                message: "Players array is required"
             });
         }
 
-        if (!updateData || Object.keys(updateData).length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: "No update fields provided"
-            });
-        }
+        for (const player of players) {
+            const { ID, ...updateData } = player;
 
-        for (const id of ids) {
-            if (!mongoose.Types.ObjectId.isValid(id)) {
-                return res.status(400).json({
-                    success: false,
-                    message: `Invalid player ID: ${id}`
-                });
-            }
+            await Player.findOneAndUpdate(
+                { ID },
+                { $set: updateData },
+                {
+                    new: true,
+                    runValidators: true
+                }
+            );
         }
-
-        const result = await Player.updateMany(
-            {
-                _id: { $in: ids }
-            },
-            {
-                $set: updateData
-            },
-            {
-                runValidators: true
-            }
-        );
 
         return res.status(200).json({
             success: true,
-            message: "Players updated successfully",
+            message: "Players updated successfully"
         });
 
     } catch (error) {
         console.error(error);
-        return res.status(400).json({ message: error.message });
+
+        return res.status(400).json({
+            success: false,
+            message: error.message
+        });
     }
 };
 

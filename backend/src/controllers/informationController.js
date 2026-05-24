@@ -119,6 +119,112 @@ const getPlayersByPreferredFoot = async (req, res) => {
         res.status(500).json({ message: 'Server Error fetching players by preferred foot' });
     }
 };
+const getPlayersByAlternativePosition = async (req, res) => {
+    try {
+        const position = req.params.position;
+        const players = await Player.find({ alternativePositions: { $regex: new RegExp(`^${position}$`, 'i') } });
+        res.json(players);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error fetching players by alternative position' });
+    }
+};
+
+const getTopRatedPlayers = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        const players = await Player.aggregate([
+            {
+                $match: {
+                    ovr: { $exists: true, $ne: null, $ne: "" }
+                }
+            },
+            {
+                $addFields: {
+                    ovrNum: { $toDouble: "$ovr" }
+                }
+            },
+            { $sort: { ovrNum: -1 } },
+            { $limit: limit }
+        ]);
+        res.json(players);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error fetching top rated players' });
+    }
+};
+
+const getTopPacedPlayers = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        const players = await Player.aggregate([
+            {
+                $match: {
+                    pac: { $exists: true, $ne: null, $ne: "" }
+                }
+            },
+            {
+                $addFields: {
+                    pacNum: { $toDouble: "$pac" }
+                }
+            },
+            { $sort: { pacNum: -1 } },
+            { $limit: limit }
+        ]);
+        res.json(players);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error fetching top paced players' });
+    }
+};
+
+const getTopDribblers = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        const players = await Player.aggregate([
+            {
+                $match: {
+                    dri: { $exists: true, $ne: null, $ne: "" }
+                }
+            },
+            {
+                $addFields: {
+                    driNum: { $toDouble: "$dri" }
+                }
+            },
+            { $sort: { driNum: -1 } },
+            { $limit: limit }
+        ]);
+        res.json(players);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error fetching top dribbling players' });
+    }
+};
+
+const getTopFinishers = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        const players = await Player.aggregate([
+            {
+                $match: {
+                    finishing: { $exists: true, $ne: null, $ne: "" }
+                }
+            },
+            {
+                $addFields: {
+                    finishingNum: { $toDouble: "$finishing" }
+                }
+            },
+            { $sort: { finishingNum: -1 } },
+            { $limit: limit }
+        ]);
+        res.json(players);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error fetching top finishing players' });
+    }
+};
 
 module.exports = {
     getPlayerByName,
@@ -130,5 +236,10 @@ module.exports = {
     getPlayersByAge,
     getPlayersByGender,
     getPlayersByPlaystyle,
-    getPlayersByPreferredFoot
+    getPlayersByPreferredFoot,
+    getPlayersByAlternativePosition,
+    getTopRatedPlayers,
+    getTopPacedPlayers,
+    getTopDribblers,
+    getTopFinishers
 };
