@@ -18,7 +18,12 @@ const {
     getPlayerByRank,
     getPlayersByTeam,
     getPlayersByLeague,
-    getPlayersByNation
+    getPlayersByNation,
+    getPlayersByPosition,
+    getPlayersByAge,
+    getPlayersByGender,
+    getPlayersByPlaystyle,
+    getPlayersByPreferredFoot
 } = require('../controllers/informationController');
 
 router.route('/exists/:id').get(checkPlayerExists);
@@ -31,6 +36,11 @@ router.route('/rank/:rank').get(getPlayerByRank);
 router.route('/team/:team').get(getPlayersByTeam);
 router.route('/league/:league').get(getPlayersByLeague);
 router.route('/nation/:nation').get(getPlayersByNation);
+router.route('/position/:position').get(getPlayersByPosition);
+router.route('/age/:age').get(getPlayersByAge);
+router.route('/gender/:gender').get(getPlayersByGender);
+router.route('/playstyle/:style').get(getPlayersByPlaystyle);
+router.route('/preferred-foot/:foot').get(getPlayersByPreferredFoot);
 
 router.route('/')
     .get(getPlayers)
