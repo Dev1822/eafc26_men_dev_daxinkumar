@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const getPlayerByName = async (req, res) => {
     try {
         const name = req.params.name;
-        const player = await Player.findOne({ Name: { $regex: new RegExp(`^${name}$`, 'i') } });
+        const player = await Player.findOne({ Name: name });
         
         if (player) {
             res.json(player);
@@ -226,6 +226,122 @@ const getTopFinishers = async (req, res) => {
     }
 };
 
+const getTopPassers = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        const players = await Player.aggregate([
+            {
+                $match: {
+                    pas: { $exists: true, $ne: null, $ne: "" }
+                }
+            },
+            {
+                $addFields: {
+                    pasNum: { $toDouble: "$pas" }
+                }
+            },
+            { $sort: { pasNum: -1 } },
+            { $limit: limit }
+        ]);
+        res.json(players);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error fetching top passing players' });
+    }
+};
+
+const getTopDefenders = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        const players = await Player.aggregate([
+            {
+                $match: {
+                    def: { $exists: true, $ne: null, $ne: "" }
+                }
+            },
+            {
+                $addFields: {
+                    defNum: { $toDouble: "$def" }
+                }
+            },
+            { $sort: { defNum: -1 } },
+            { $limit: limit }
+        ]);
+        res.json(players);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error fetching top defending players' });
+    }
+};
+
+const getTopPhysicalPlayers = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        const players = await Player.aggregate([
+            {
+                $match: {
+                    phy: { $exists: true, $ne: null, $ne: "" }
+                }
+            },
+            {
+                $addFields: {
+                    phyNum: { $toDouble: "$phy" }
+                }
+            },
+            { $sort: { phyNum: -1 } },
+            { $limit: limit }
+        ]);
+        res.json(players);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error fetching top physical players' });
+    }
+};
+
+const getTopYoungsters = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        const players = await Player.aggregate([
+            {
+                $match: {
+                    age: { $exists: true, $ne: null, $ne: "" },
+                    ovr: { $exists: true, $ne: null, $ne: "" }
+                }
+            },
+            {
+                $addFields: {
+                    ageNum: { $toDouble: "$age" },
+                    ovrNum: { $toDouble: "$ovr" }
+                }
+            },
+            {
+                $match: {
+                    ageNum: { $lte: 23 }
+                }
+            },
+            { $sort: { ovrNum: -1 } },
+            { $limit: limit }
+        ]);
+        res.json(players);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error fetching top youngsters' });
+    }
+};
+
+const getRecentPlayers = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        const players = await Player.find({})
+            .sort({ createdAt: -1 })
+            .limit(limit);
+        res.json(players);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error fetching recently added players' });
+    }
+};
+
 module.exports = {
     getPlayerByName,
     getPlayerByRank,
@@ -241,5 +357,10 @@ module.exports = {
     getTopRatedPlayers,
     getTopPacedPlayers,
     getTopDribblers,
-    getTopFinishers
+    getTopFinishers,
+    getTopPassers,
+    getTopDefenders,
+    getTopPhysicalPlayers,
+    getTopYoungsters,
+    getRecentPlayers
 };
