@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const getPlayerByName = async (req, res) => {
     try {
         const name = req.params.name;
-        const player = await Player.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
+        const player = await Player.findOne({ Name: { $regex: new RegExp(`^${name}$`, 'i') } });
         
         if (player) {
             res.json(player);
@@ -19,11 +19,7 @@ const getPlayerByName = async (req, res) => {
 
 const getPlayerByRank = async (req, res) => {
     try {
-        const rank = Number(req.params.rank);
-        if (isNaN(rank)) {
-            return res.status(400).json({ message: 'Invalid rank format, must be a number' });
-        }
-
+        const rank = req.params.rank;
         const player = await Player.findOne({ rank });
         if (player) {
             res.json(player);
@@ -69,10 +65,70 @@ const getPlayersByNation = async (req, res) => {
     }
 };
 
+const getPlayersByPosition = async (req, res) => {
+    try {
+        const position = req.params.position;
+        const players = await Player.find({ position: { $regex: new RegExp(`^${position}$`, 'i') } });
+        res.json(players);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error fetching players by position' });
+    }
+};
+
+const getPlayersByAge = async (req, res) => {
+    try {
+        const age = req.params.age;
+        const players = await Player.find({ age });
+        res.json(players);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error fetching players by age' });
+    }
+};
+
+const getPlayersByGender = async (req, res) => {
+    try {
+        const gender = req.params.gender;
+        const players = await Player.find({ gender: { $regex: new RegExp(`^${gender}$`, 'i') } });
+        res.json(players);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error fetching players by gender' });
+    }
+};
+
+const getPlayersByPlaystyle = async (req, res) => {
+    try {
+        const style = req.params.style;
+        const players = await Player.find({ playStyles: { $regex: new RegExp(`^${style}$`, 'i') } });
+        res.json(players);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error fetching players by playstyle' });
+    }
+};
+
+const getPlayersByPreferredFoot = async (req, res) => {
+    try {
+        const foot = req.params.foot;
+        const players = await Player.find({ preferredFoot: { $regex: new RegExp(`^${foot}$`, 'i') } });
+        res.json(players);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error fetching players by preferred foot' });
+    }
+};
+
 module.exports = {
     getPlayerByName,
     getPlayerByRank,
     getPlayersByTeam,
     getPlayersByLeague,
-    getPlayersByNation
+    getPlayersByNation,
+    getPlayersByPosition,
+    getPlayersByAge,
+    getPlayersByGender,
+    getPlayersByPlaystyle,
+    getPlayersByPreferredFoot
 };
