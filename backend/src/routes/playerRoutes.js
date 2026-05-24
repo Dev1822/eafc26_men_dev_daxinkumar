@@ -13,10 +13,24 @@ const {
     bulkDeletePlayers
 } = require('../controllers/playerController');
 
+const {
+    getPlayerByName,
+    getPlayerByRank,
+    getPlayersByTeam,
+    getPlayersByLeague,
+    getPlayersByNation
+} = require('../controllers/informationController');
+
 router.route('/exists/:id').get(checkPlayerExists);
 router.route('/bulk-create').post(bulkCreatePlayers);
 router.route('/bulk-update').patch(bulkUpdatePlayers);
 router.route('/bulk-delete').delete(bulkDeletePlayers);
+
+router.route('/name/:name').get(getPlayerByName);
+router.route('/rank/:rank').get(getPlayerByRank);
+router.route('/team/:team').get(getPlayersByTeam);
+router.route('/league/:league').get(getPlayersByLeague);
+router.route('/nation/:nation').get(getPlayersByNation);
 
 router.route('/')
     .get(getPlayers)

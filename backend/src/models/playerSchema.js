@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
 const playerSchema = new mongoose.Schema({
-    Id: { type: String, required: true, unique: true },
+    ID: { type: String, required: true, unique: true },
     rank: { type: Number },
-    name: { type: String, required: true, index: true },
+    Name: { type: String, required: true, index: true },
     gender: { type: String, enum: ['M', 'F'] },
     ovr: { type: Number, index: true },
     pac: { type: Number },
