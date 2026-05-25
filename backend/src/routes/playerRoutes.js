@@ -33,7 +33,12 @@ const {
     getTopDefenders,
     getTopPhysicalPlayers,
     getTopYoungsters,
-    getRecentPlayers
+    getRecentPlayers,
+    getPlayersBySkillMoves,
+    getPlayersByWeakFoot,
+    comparePlayers,
+    getPlayerPerformance,
+    getPlayerStats
 } = require('../controllers/informationController');
 
 router.route('/exists/:id').get(checkPlayerExists);
@@ -61,6 +66,11 @@ router.route('/top-defenders').get(getTopDefenders);
 router.route('/top-physical').get(getTopPhysicalPlayers);
 router.route('/top-youngsters').get(getTopYoungsters);
 router.route('/recent').get(getRecentPlayers);
+router.route('/skill-moves/:value').get(getPlayersBySkillMoves);
+router.route('/weak-foot/:value').get(getPlayersByWeakFoot);
+router.route('/compare/:player1/:player2').get(comparePlayers);
+router.route('/performance/:id').get(getPlayerPerformance);
+router.route('/stats/:id').get(getPlayerStats);
 
 router.route('/')
     .get(getPlayers)
