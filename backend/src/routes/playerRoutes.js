@@ -10,7 +10,8 @@ const {
     updatePlayer,
     bulkUpdatePlayers,
     deletePlayer,
-    bulkDeletePlayers
+    bulkDeletePlayers,
+    getPlayersSorted
 } = require('../controllers/playerController');
 
 const {
@@ -45,6 +46,7 @@ router.route('/exists/:id').get(checkPlayerExists);
 router.route('/bulk-create').post(bulkCreatePlayers);
 router.route('/bulk-update').patch(bulkUpdatePlayers);
 router.route('/bulk-delete').delete(bulkDeletePlayers);
+router.route('/sort/:fieldAndOrder').get(getPlayersSorted);
 
 router.route('/name/:name').get(getPlayerByName);
 router.route('/rank/:rank').get(getPlayerByRank);
