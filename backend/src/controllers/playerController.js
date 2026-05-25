@@ -21,6 +21,26 @@ const getPlayers = async (req, res) => {
             filter.nation = req.query.nation;
         }
 
+        if (req.query.position) {
+            filter.position = req.query.position;
+        }
+
+        if (req.query.preferredFoot) {
+            filter.preferredFoot = req.query.preferredFoot;
+        }
+
+        if (req.query.age) {
+            filter.age = req.query.age;
+        }
+
+        if (req.query.skillMoves) {
+            filter.skillMoves = req.query.skillMoves;
+        }
+
+        if (req.query.weakFoot) {
+            filter.weakFoot = req.query.weakFoot;
+        }
+
         const exprConditions = [];
 
         if (req.query.minPace) {
