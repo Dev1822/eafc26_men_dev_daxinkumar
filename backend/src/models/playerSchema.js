@@ -1,187 +1,123 @@
 const mongoose = require('mongoose');
 
 const playerSchema = new mongoose.Schema(
-    {
-        // Basic Info
-        ID: {
-            type: Number,
-            required: true,
-            unique: true,
-            index: true
-        },
-
-        rank: {
-            type: Number
-        },
-
-        name: {
-            type: String,
-            required: true,
-            trim: true,
-            index: true
-        },
-
-        gender: {
-            type: String,
-            enum: ['M', 'F']
-        },
-
-        age: {
-            type: Number,
-            index: true
-        },
-
-        nation: {
-            type: String,
-            index: true
-        },
-
-        league: {
-            type: String,
-            index: true
-        },
-
-        team: {
-            type: String,
-            index: true
-        },
-
-        // Overall Stats
-        ovr: {
-            type: Number,
-            index: true
-        },
-
-        pac: Number,
-        sho: Number,
-        pas: Number,
-        dri: Number,
-        def: Number,
-        phy: Number,
-
-        // Pace
-        acceleration: Number,
-        sprintSpeed: Number,
-
-        // Shooting
-        positioning: Number,
-        finishing: Number,
-        shotPower: Number,
-        longShots: Number,
-        volleys: Number,
-        penalties: Number,
-
-        // Passing
-        vision: Number,
-        crossing: Number,
-        freeKickAccuracy: Number,
-        shortPassing: Number,
-        longPassing: Number,
-        curve: Number,
-
-        // Dribbling
-        dribbling: Number,
-        agility: Number,
-        balance: Number,
-        reactions: Number,
-        ballControl: Number,
-        composure: Number,
-
-        // Defending
-        interceptions: Number,
-        headingAccuracy: Number,
-        defAwareness: Number,
-        standingTackle: Number,
-        slidingTackle: Number,
-
-        // Physical
-        jumping: Number,
-        stamina: Number,
-        strength: Number,
-        aggression: Number,
-
-        // Goalkeeping
-        gkDiving: {
-            type: Number,
-            default: 0
-        },
-
-        gkHandling: {
-            type: Number,
-            default: 0
-        },
-
-        gkKicking: {
-            type: Number,
-            default: 0
-        },
-
-        gkPositioning: {
-            type: Number,
-            default: 0
-        },
-
-        gkReflexes: {
-            type: Number,
-            default: 0
-        },
-
-        // Player Meta
-        position: {
-            type: String,
-            index: true
-        },
-
-        alternativePositions: [
-            {
-                type: String
-            }
-        ],
-
-        weakFoot: {
-            type: Number,
-            min: 1,
-            max: 5
-        },
-
-        skillMoves: {
-            type: Number,
-            min: 1,
-            max: 5
-        },
-
-        preferredFoot: {
-            type: String,
-            enum: ['Right', 'Left']
-        },
-
-        height: {
-            type: String
-        },
-
-        weight: {
-            type: String
-        },
-
-        playStyles: [
-            {
-                type: String
-            }
-        ],
-
-        // Media
-        url: {
-            type: String
-        },
-
-        cardImage: {
-            type: String
-        }
+  {
+    ID: {
+      type: String,
+      required: true,
+      unique: true,
     },
-    {
-        timestamps: true,
-        versionKey: false
-    }
+
+    Rank: String,
+    Name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    GENDER: {
+      type: String,
+      enum: ["M", "F"],
+    },
+
+    OVR: String,
+    PAC: String,
+    SHO: String,
+    PAS: String,
+    DRI: String,
+    DEF: String,
+    PHY: String,
+
+    // Pace
+    Acceleration: String,
+    "Sprint Speed": String,
+
+    // Shooting
+    Positioning: String,
+    Finishing: String,
+    "Shot Power": String,
+    "Long Shots": String,
+    Volleys: String,
+    Penalties: String,
+
+    // Passing
+    Vision: String,
+    Crossing: String,
+    "Free Kick Accuracy": String,
+    "Short Passing": String,
+    "Long Passing": String,
+    Curve: String,
+
+    // Dribbling
+    Dribbling: String,
+    Agility: String,
+    Balance: String,
+    Reactions: String,
+    "Ball Control": String,
+    Composure: String,
+
+    // Defending
+    Interceptions: String,
+    "Heading Accuracy": String,
+    "Def Awareness": String,
+    "Standing Tackle": String,
+    "Sliding Tackle": String,
+
+    // Physical
+    Jumping: String,
+    Stamina: String,
+    Strength: String,
+    Aggression: String,
+
+    // Player Info
+    Position: String,
+    "Weak foot": String,
+    "Skill moves": String,
+    "Preferred foot": {
+      type: String,
+      enum: ["Left", "Right"],
+    },
+
+    Height: String,
+    Weight: String,
+
+    "Alternative positions": [String],
+
+    Age: String,
+    Nation: String,
+    League: String,
+    Team: String,
+
+    "play style": [String],
+
+    url: String,
+    card: String,
+
+    // Goalkeeping
+    "GK Diving": {
+      type: String,
+      default: null,
+    },
+    "GK Handling": {
+      type: String,
+      default: null,
+    },
+    "GK Kicking": {
+      type: String,
+      default: null,
+    },
+    "GK Positioning": {
+      type: String,
+      default: null,
+    },
+    "GK Reflexes": {
+      type: String,
+      default: null,
+    },
+  },
+  {
+    timestamps: true,
+  }
 );
 
-module.exports = mongoose.model('Player', playerSchema);
+module.exports = mongoose.model("Player", playerSchema);

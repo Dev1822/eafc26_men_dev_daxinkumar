@@ -1,169 +1,203 @@
-const Player = require('../models/playerSchema');
 const mongoose = require('mongoose');
+const Player = require('../models/playerSchema');
 
+// ================= GET ALL PLAYERS =================
 const getPlayers = async (req, res) => {
     try {
         const filter = {};
 
-        if (req.query.ovr) {
-            filter.ovr = req.query.ovr;
-        }
-
-        if (req.query.team) {
-            filter.team = req.query.team;
-        }
-
-        if (req.query.league) {
-            filter.league = req.query.league;
-        }
-
-        if (req.query.nation) {
-            filter.nation = req.query.nation;
-        }
-
-        if (req.query.position) {
-            filter.position = req.query.position;
-        }
+        // Basic Filters
+        if (req.query.ID) filter.ID = req.query.ID;
+        if (req.query.name) filter.Name = req.query.name;
+        if (req.query.gender) filter.GENDER = req.query.gender;
+        if (req.query.team) filter.Team = req.query.team;
+        if (req.query.league) filter.League = req.query.league;
+        if (req.query.nation) filter.Nation = req.query.nation;
+        if (req.query.position) filter.Position = req.query.position;
+        if (req.query.ovr) filter.OVR = req.query.ovr;
+        if (req.query.age) filter.Age = req.query.age;
 
         if (req.query.preferredFoot) {
-            filter.preferredFoot = req.query.preferredFoot;
-        }
-
-        if (req.query.age) {
-            filter.age = req.query.age;
+            filter["Preferred foot"] = req.query.preferredFoot;
         }
 
         if (req.query.skillMoves) {
-            filter.skillMoves = req.query.skillMoves;
+            filter["Skill moves"] = req.query.skillMoves;
         }
 
         if (req.query.weakFoot) {
-            filter.weakFoot = req.query.weakFoot;
+            filter["Weak foot"] = req.query.weakFoot;
         }
 
+        // Numeric Filters
         const exprConditions = [];
 
         if (req.query.minPace) {
-            const target = Number(req.query.minPace);
-            if (!isNaN(target)) {
-                exprConditions.push({ $gte: [{ $toDouble: "$pac" }, target] });
-            }
-        }
-
-        if (req.query.minShooting) {
-            const target = Number(req.query.minShooting);
-            if (!isNaN(target)) {
-                exprConditions.push({ $gte: [{ $toDouble: "$sho" }, target] });
-            }
-        }
-
-        if (req.query.minPassing) {
-            const target = Number(req.query.minPassing);
-            if (!isNaN(target)) {
-                exprConditions.push({ $gte: [{ $toDouble: "$pas" }, target] });
-            }
-        }
-
-        if (req.query.minDribbling) {
-            const target = Number(req.query.minDribbling);
-            if (!isNaN(target)) {
-                exprConditions.push({ $gte: [{ $toDouble: "$dri" }, target] });
-            }
-        }
-
-        if (req.query.minDefending) {
-            const target = Number(req.query.minDefending);
-            if (!isNaN(target)) {
-                exprConditions.push({ $gte: [{ $toDouble: "$def" }, target] });
-            }
-        }
-
-        if (req.query.minPhysical) {
-            const target = Number(req.query.minPhysical);
-            if (!isNaN(target)) {
-                exprConditions.push({ $gte: [{ $toDouble: "$phy" }, target] });
-            }
-        }
-
-        if (exprConditions.length > 0) {
-            filter.$expr = { $and: exprConditions };
-        }
-
-        const players = await Player.find(filter);
-        res.json(players);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server Error fetching players' });
-    }
-};
-
-const getPlayerById = async (req, res) => {
-    try {
-        const player = await Player.findById(req.params.id);
-        
-        if (player) {
-            res.json(player);
-        } else {
-            res.status(404).json({ message: 'Player not found' });
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server Error fetching player details' });
-    }
-};
-
-const checkPlayerExists = async (req, res) => {
-    try {
-        const player = await Player.findById(req.params.id);
-
-        if (player) {
-            return res.status(200).json({
-                exists: true,
-                message: "Player exists"
+            exprConditions.push({
+                $gte: [{ $toDouble: "$PAC" }, Number(req.query.minPace)]
             });
         }
 
-        return res.status(404).json({
-            exists: false,
-            message: "Player does not exist"
+        if (req.query.minShooting) {
+            exprConditions.push({
+                $gte: [{ $toDouble: "$SHO" }, Number(req.query.minShooting)]
+            });
+        }
+
+        if (req.query.minPassing) {
+            exprConditions.push({
+                $gte: [{ $toDouble: "$PAS" }, Number(req.query.minPassing)]
+            });
+        }
+
+        if (req.query.minDribbling) {
+            exprConditions.push({
+                $gte: [{ $toDouble: "$DRI" }, Number(req.query.minDribbling)]
+            });
+        }
+
+        if (req.query.minDefending) {
+            exprConditions.push({
+                $gte: [{ $toDouble: "$DEF" }, Number(req.query.minDefending)]
+            });
+        }
+
+        if (req.query.minPhysical) {
+            exprConditions.push({
+                $gte: [{ $toDouble: "$PHY" }, Number(req.query.minPhysical)]
+            });
+        }
+
+        if (exprConditions.length > 0) {
+            filter.$expr = {
+                $and: exprConditions
+            };
+        }
+
+        const players = await Player.find(filter);
+
+        return res.status(200).json({
+            success: true,
+            count: players.length,
+            data: players
         });
 
     } catch (error) {
         console.error(error);
 
         return res.status(500).json({
-            message: "Server error fetching player details"
+            success: false,
+            message: error.message
         });
     }
 };
 
-const createPlayer = async (req, res) => {
-    try {
-        const Id = req.body.Id || req.body.ID || req.body.id;
-        const name = req.body.name || req.body.Name;
 
-        if (!Id || !name) {
-            return res.status(400).json({ message: 'Both Id and name are required' });
+
+// ================= GET PLAYER BY ID =================
+const getPlayerById = async (req, res) => {
+    try {
+        const player = await Player.findOne({
+            ID: req.params.id
+        });
+
+        if (!player) {
+            return res.status(404).json({
+                success: false,
+                message: "Player not found"
+            });
         }
 
-        const existingPlayer = await Player.findOne({ Id });
+        return res.status(200).json({
+            success: true,
+            data: player
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+
+
+// ================= CHECK PLAYER EXISTS =================
+const checkPlayerExists = async (req, res) => {
+    try {
+        const player = await Player.findOne({
+            ID: req.params.id
+        });
+
+        return res.status(200).json({
+            success: true,
+            exists: !!player
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+
+
+// ================= CREATE PLAYER =================
+const createPlayer = async (req, res) => {
+    try {
+        const ID = req.body.ID || req.body.Id || req.body.id;
+        const Name = req.body.Name || req.body.name;
+
+        if (!ID || !Name) {
+            return res.status(400).json({
+                success: false,
+                message: "Both ID and Name are required"
+            });
+        }
+
+        const existingPlayer = await Player.findOne({ ID });
+
         if (existingPlayer) {
-            return res.status(409).json({ message: `Player with Id '${Id}' already exists` });
+            return res.status(409).json({
+                success: false,
+                message: `Player with ID '${ID}' already exists`
+            });
         }
 
         const newPlayer = new Player({
             ...req.body,
-            Id,
-            name
+            ID,
+            Name
         });
+
         const savedPlayer = await newPlayer.save();
-        res.status(201).json(savedPlayer);
+
+        return res.status(201).json({
+            success: true,
+            message: "Player created successfully",
+            data: savedPlayer
+        });
+
     } catch (error) {
         console.error(error);
-        return res.status(400).json({ message: error.message });
+
+        return res.status(400).json({
+            success: false,
+            message: error.message
+        });
     }
 };
 
+
+
+// ================= BULK CREATE PLAYERS =================
 const bulkCreatePlayers = async (req, res) => {
     try {
         const { players } = req.body;
@@ -171,71 +205,78 @@ const bulkCreatePlayers = async (req, res) => {
         if (!Array.isArray(players) || players.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: "Players array is required and cannot be empty"
+                message: "Players array is required"
             });
         }
 
-        const newPlayers = await Player.insertMany(players);
+        const insertedPlayers = await Player.insertMany(players);
 
-        res.status(201).json({
+        return res.status(201).json({
             success: true,
-            message: `${players.length} players created successfully`,
-            data: newPlayers
+            count: insertedPlayers.length,
+            data: insertedPlayers
         });
 
     } catch (error) {
-        res.status(400).json({
+        console.error(error);
+
+        return res.status(400).json({
             success: false,
             message: error.message
         });
     }
 };
 
+
+
+// ================= REPLACE PLAYER =================
 const replacePlayer = async (req, res) => {
     try {
-        const Id = req.body.Id || req.body.ID || req.body.id;
-        const name = req.body.name || req.body.Name;
+        const ID = req.params.id;
 
-        if (!Id || !name) {
-            return res.status(400).json({ message: 'Both Id and name are required' });
-        }
+        const replacementData = {
+            ...req.body,
+            ID
+        };
 
-        const updatedPlayer = await Player.findByIdAndUpdate(
-            Id,
-            name,
-            req.body,
-            { new: true, overwrite: true, runValidators: true }
+        const replacedPlayer = await Player.findOneAndReplace(
+            { ID },
+            replacementData,
+            {
+                new: true,
+                runValidators: true
+            }
         );
 
-        if (!updatedPlayer) {
+        if (!replacedPlayer) {
             return res.status(404).json({
                 success: false,
                 message: "Player not found"
             });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: "Player replaced successfully",
-            data: updatedPlayer
+            data: replacedPlayer
         });
+
     } catch (error) {
         console.error(error);
-        return res.status(400).json({ message: error.message });
+
+        return res.status(400).json({
+            success: false,
+            message: error.message
+        });
     }
 };
 
+
+
+// ================= UPDATE PLAYER =================
 const updatePlayer = async (req, res) => {
     try {
-        const { id } = req.params;
-
-         
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid ID format"
-            });
-        }
+        const ID = req.params.id;
 
         if (!req.body || Object.keys(req.body).length === 0) {
             return res.status(400).json({
@@ -244,10 +285,13 @@ const updatePlayer = async (req, res) => {
             });
         }
 
-        const updatedPlayer = await Player.findByIdAndUpdate(
-            id,
-            req.body,
-            { new: true, runValidators: true }
+        const updatedPlayer = await Player.findOneAndUpdate(
+            { ID },
+            { $set: req.body },
+            {
+                new: true,
+                runValidators: true
+            }
         );
 
         if (!updatedPlayer) {
@@ -257,7 +301,7 @@ const updatePlayer = async (req, res) => {
             });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: "Player updated successfully",
             data: updatedPlayer
@@ -265,10 +309,17 @@ const updatePlayer = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        return res.status(400).json({ message: error.message });
+
+        return res.status(400).json({
+            success: false,
+            message: error.message
+        });
     }
 };
 
+
+
+// ================= BULK UPDATE PLAYERS =================
 const bulkUpdatePlayers = async (req, res) => {
     try {
         const players = req.body;
@@ -308,21 +359,41 @@ const bulkUpdatePlayers = async (req, res) => {
     }
 };
 
+
+
+// ================= DELETE PLAYER =================
 const deletePlayer = async (req, res) => {
     try {
-        const player = await Player.findByIdAndDelete(req.params.id);
-        
-        if (player) {
-            res.json({ message: 'Player record deleted successfully', player });
-        } else {
-            res.status(404).json({ message: 'Player not found' });
+        const deletedPlayer = await Player.findOneAndDelete({
+            ID: req.params.id
+        });
+
+        if (!deletedPlayer) {
+            return res.status(404).json({
+                success: false,
+                message: "Player not found"
+            });
         }
+
+        return res.status(200).json({
+            success: true,
+            message: "Player deleted successfully",
+            data: deletedPlayer
+        });
+
     } catch (error) {
         console.error(error);
-        return res.status(400).json({ message: error.message });
+
+        return res.status(400).json({
+            success: false,
+            message: error.message
+        });
     }
 };
 
+
+
+// ================= BULK DELETE PLAYERS =================
 const bulkDeletePlayers = async (req, res) => {
     try {
         const { ids } = req.body;
@@ -330,36 +401,30 @@ const bulkDeletePlayers = async (req, res) => {
         if (!Array.isArray(ids) || ids.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: "IDs array is required and cannot be empty"
-            });
-        }
-
-        const validIds = ids.filter(id =>
-            mongoose.Types.ObjectId.isValid(id)
-        );
-
-        if (validIds.length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: "No valid IDs provided"
+                message: "IDs array is required"
             });
         }
 
         const result = await Player.deleteMany({
-            _id: { $in: validIds }
+            ID: { $in: ids }
         });
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
-            message: `Players deleted successfully`,
-            data: null
+            deletedCount: result.deletedCount
         });
 
     } catch (error) {
         console.error(error);
-        return res.status(400).json({ message: error.message });
+
+        return res.status(400).json({
+            success: false,
+            message: error.message
+        });
     }
 };
+
+
 
 module.exports = {
     getPlayers,
