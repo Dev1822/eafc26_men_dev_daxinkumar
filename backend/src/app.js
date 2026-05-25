@@ -1,10 +1,14 @@
 require("dotenv").config();
 const express=require("express");
 const playerRoutes = require('./routes/playerRoutes');
+const searchRoutes = require('./routes/searchRoutes');
+const informationRoutes = require('./routes/informationRoutes');
 
 const app=express();
 app.use(express.json())
 
 app.use('/players', playerRoutes);
+app.use('/players', informationRoutes);
+app.use('/search', searchRoutes);
 
 module.exports=app;
