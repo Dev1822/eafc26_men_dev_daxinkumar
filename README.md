@@ -332,6 +332,11 @@ GET /players?minPhysical=80
 GET /players?team=Liverpool
 GET /players?league=Premier League
 GET /players?nation=France
+GET /players?position=ST
+GET /players?preferredFoot=Left
+GET /players?age=26
+GET /players?skillMoves=5
+GET /players?weakFoot=4
 ```
 
 ## Pagination

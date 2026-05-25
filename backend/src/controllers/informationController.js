@@ -19,7 +19,7 @@ const getPlayerByName = async (req, res) => {
 
 const getPlayerByRank = async (req, res) => {
     try {
-        const rank = Number(req.params.rank);
+        const rank = req.params.rank;
 
         const player = await Player.findOne({ rank });
 
