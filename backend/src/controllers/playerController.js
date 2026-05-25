@@ -74,13 +74,30 @@ const getPlayers = async (req, res) => {
             };
         }
 
-        const players = await Player.find(filter);
+        let playersQuery = Player.find(filter);
 
-        return res.status(200).json({
+        let page, limit;
+        if (req.query.page && req.query.limit) {
+            page = parseInt(req.query.page, 10);
+            limit = parseInt(req.query.limit, 10);
+            const skip = (page - 1) * limit;
+            playersQuery = playersQuery.skip(skip).limit(limit);
+        }
+
+        const players = await playersQuery;
+
+        const responseData = {
             success: true,
             count: players.length,
             data: players
-        });
+        };
+        
+        if (page && limit) {
+            responseData.page = page;
+            responseData.limit = limit;
+        }
+
+        return res.status(200).json(responseData);
 
     } catch (error) {
         console.error(error);

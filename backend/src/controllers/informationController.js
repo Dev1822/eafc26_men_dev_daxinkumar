@@ -43,7 +43,16 @@ const getPlayerByRank = async (req, res) => {
 const getPlayersByTeam = async (req, res) => {
     try {
         const team = req.params.team;
-        const players = await Player.find({ Team: team });
+        let playersQuery = Player.find({ Team: team });
+
+        if (req.query.page && req.query.limit) {
+            const page = parseInt(req.query.page, 10);
+            const limit = parseInt(req.query.limit, 10);
+            const skip = (page - 1) * limit;
+            playersQuery = playersQuery.skip(skip).limit(limit);
+        }
+
+        const players = await playersQuery;
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -109,11 +118,23 @@ const getPlayersByGender = async (req, res) => {
 const getPlayersByPlaystyle = async (req, res) => {
     try {
         const style = req.params.style;
-        const players = await Player.find({ "play style": style });
-        res.json(players);
+
+        const players = await Player.find({
+            "play style": {
+                $regex: style,
+                $options: "i"
+            }
+        });
+
+        res.status(200).json(players);
+
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server Error fetching players by playstyle' });
+        console.error("Error fetching players by playstyle:", error);
+
+        res.status(500).json({
+            success: false,
+            message: "Server Error fetching players by playstyle"
+        });
     }
 };
 
@@ -130,18 +151,29 @@ const getPlayersByPreferredFoot = async (req, res) => {
 const getPlayersByAlternativePosition = async (req, res) => {
     try {
         const position = req.params.position;
-        const players = await Player.find({ "Alternative positions": position });
-        res.json(players);
+
+        const players = await Player.find({
+            "Alternative positions": {
+                $regex: position,
+                $options: "i"
+            }
+        });
+
+        res.status(200).json(players);
+
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server Error fetching players by alternative position' });
+        console.error("Error fetching players by alternate positions:", error);
+
+        res.status(500).json({
+            success: false,
+            message: "Server Error fetching players by alternate positions"
+        });
     }
 };
 
 const getTopRatedPlayers = async (req, res) => {
     try {
-        const limit = parseInt(req.query.limit) || 10;
-        const players = await Player.aggregate([
+        const pipeline = [
             {
                 $match: {
                     OVR: { $exists: true, $ne: null, $ne: "" }
@@ -152,9 +184,21 @@ const getTopRatedPlayers = async (req, res) => {
                     ovrNum: { $toDouble: "$OVR" }
                 }
             },
-            { $sort: { ovrNum: -1 } },
-            { $limit: limit }
-        ]);
+            { $sort: { ovrNum: -1 } }
+        ];
+
+        if (req.query.page && req.query.limit) {
+            const page = parseInt(req.query.page, 10);
+            const limit = parseInt(req.query.limit, 10);
+            const skip = (page - 1) * limit;
+            pipeline.push({ $skip: skip });
+            pipeline.push({ $limit: limit });
+        } else {
+            const defaultLimit = parseInt(req.query.limit) || 10;
+            pipeline.push({ $limit: defaultLimit });
+        }
+
+        const players = await Player.aggregate(pipeline);
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -164,8 +208,7 @@ const getTopRatedPlayers = async (req, res) => {
 
 const getTopPacedPlayers = async (req, res) => {
     try {
-        const limit = parseInt(req.query.limit) || 10;
-        const players = await Player.aggregate([
+        const pipeline = [
             {
                 $match: {
                     PAC: { $exists: true, $ne: null, $ne: "" }
@@ -176,9 +219,21 @@ const getTopPacedPlayers = async (req, res) => {
                     pacNum: { $toDouble: "$PAC" }
                 }
             },
-            { $sort: { pacNum: -1 } },
-            { $limit: limit }
-        ]);
+            { $sort: { pacNum: -1 } }
+        ];
+
+        if (req.query.page && req.query.limit) {
+            const page = parseInt(req.query.page, 10);
+            const limit = parseInt(req.query.limit, 10);
+            const skip = (page - 1) * limit;
+            pipeline.push({ $skip: skip });
+            pipeline.push({ $limit: limit });
+        } else {
+            const defaultLimit = parseInt(req.query.limit) || 10;
+            pipeline.push({ $limit: defaultLimit });
+        }
+
+        const players = await Player.aggregate(pipeline);
         res.json(players);
     } catch (error) {
         console.error(error);
