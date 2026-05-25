@@ -19,16 +19,24 @@ const getPlayerByName = async (req, res) => {
 
 const getPlayerByRank = async (req, res) => {
     try {
-        const rank = req.params.rank;
-        const player = await Player.findOne({ rank : rank });
-        if (player) {
-            res.json(player);
-        } else {
-            res.status(404).json({ message: `Player with rank ${rank} not found` });
+        const rank = Number(req.params.rank);
+
+        const player = await Player.findOne({ rank });
+
+        if (!player) {
+            return res.status(404).json({
+                message: `Player with rank ${rank} not found`
+            });
         }
+
+        res.status(200).json(player);
+
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Server Error fetching player by rank' });
+
+        res.status(500).json({
+            message: 'Server Error fetching player by rank'
+        });
     }
 };
 
@@ -57,7 +65,7 @@ const getPlayersByLeague = async (req, res) => {
 const getPlayersByNation = async (req, res) => {
     try {
         const nation = req.params.nation;
-        const players = await Player.find({ nation: { $regex: new RegExp(`^${nation}$`, 'i') } });
+        const players = await Player.find({ nation: nation });
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -68,7 +76,7 @@ const getPlayersByNation = async (req, res) => {
 const getPlayersByPosition = async (req, res) => {
     try {
         const position = req.params.position;
-        const players = await Player.find({ position: { $regex: new RegExp(`^${position}$`, 'i') } });
+        const players = await Player.find({ position: position });
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -90,7 +98,7 @@ const getPlayersByAge = async (req, res) => {
 const getPlayersByGender = async (req, res) => {
     try {
         const gender = req.params.gender;
-        const players = await Player.find({ gender: { $regex: new RegExp(`^${gender}$`, 'i') } });
+        const players = await Player.find({ gender: gender });
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -101,7 +109,7 @@ const getPlayersByGender = async (req, res) => {
 const getPlayersByPlaystyle = async (req, res) => {
     try {
         const style = req.params.style;
-        const players = await Player.find({ playStyles: { $regex: new RegExp(`^${style}$`, 'i') } });
+        const players = await Player.find({ playStyles: style });
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -112,7 +120,7 @@ const getPlayersByPlaystyle = async (req, res) => {
 const getPlayersByPreferredFoot = async (req, res) => {
     try {
         const foot = req.params.foot;
-        const players = await Player.find({ preferredFoot: { $regex: new RegExp(`^${foot}$`, 'i') } });
+        const players = await Player.find({ preferredFoot: foot });
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -122,7 +130,7 @@ const getPlayersByPreferredFoot = async (req, res) => {
 const getPlayersByAlternativePosition = async (req, res) => {
     try {
         const position = req.params.position;
-        const players = await Player.find({ alternativePositions: { $regex: new RegExp(`^${position}$`, 'i') } });
+        const players = await Player.find({ alternativePositions: position });
         res.json(players);
     } catch (error) {
         console.error(error);
