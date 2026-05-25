@@ -63,7 +63,16 @@ const getPlayersByTeam = async (req, res) => {
 const getPlayersByLeague = async (req, res) => {
     try {
         const league = req.params.league;
-        const players = await Player.find({ League: league });
+        let playersQuery = Player.find({ League: league });
+
+        if (req.query.page && req.query.limit) {
+            const page = parseInt(req.query.page, 10);
+            const limit = parseInt(req.query.limit, 10);
+            const skip = (page - 1) * limit;
+            playersQuery = playersQuery.skip(skip).limit(limit);
+        }
+
+        const players = await playersQuery;
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -74,7 +83,16 @@ const getPlayersByLeague = async (req, res) => {
 const getPlayersByNation = async (req, res) => {
     try {
         const nation = req.params.nation;
-        const players = await Player.find({ Nation: nation });
+        let playersQuery = Player.find({ Nation: nation });
+
+        if (req.query.page && req.query.limit) {
+            const page = parseInt(req.query.page, 10);
+            const limit = parseInt(req.query.limit, 10);
+            const skip = (page - 1) * limit;
+            playersQuery = playersQuery.skip(skip).limit(limit);
+        }
+
+        const players = await playersQuery;
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -85,7 +103,16 @@ const getPlayersByNation = async (req, res) => {
 const getPlayersByPosition = async (req, res) => {
     try {
         const position = req.params.position;
-        const players = await Player.find({ Position: position });
+        let playersQuery = Player.find({ Position: position });
+
+        if (req.query.page && req.query.limit) {
+            const page = parseInt(req.query.page, 10);
+            const limit = parseInt(req.query.limit, 10);
+            const skip = (page - 1) * limit;
+            playersQuery = playersQuery.skip(skip).limit(limit);
+        }
+
+        const players = await playersQuery;
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -119,13 +146,21 @@ const getPlayersByPlaystyle = async (req, res) => {
     try {
         const style = req.params.style;
 
-        const players = await Player.find({
+        let playersQuery = Player.find({
             "play style": {
                 $regex: style,
                 $options: "i"
             }
         });
 
+        if (req.query.page && req.query.limit) {
+            const page = parseInt(req.query.page, 10);
+            const limit = parseInt(req.query.limit, 10);
+            const skip = (page - 1) * limit;
+            playersQuery = playersQuery.skip(skip).limit(limit);
+        }
+
+        const players = await playersQuery;
         res.status(200).json(players);
 
     } catch (error) {
@@ -394,10 +429,19 @@ const getTopYoungsters = async (req, res) => {
 
 const getRecentPlayers = async (req, res) => {
     try {
-        const limit = parseInt(req.query.limit) || 10;
-        const players = await Player.find({})
-            .sort({ createdAt: -1 })
-            .limit(limit);
+        let playersQuery = Player.find({}).sort({ createdAt: -1 });
+
+        if (req.query.page && req.query.limit) {
+            const page = parseInt(req.query.page, 10);
+            const limit = parseInt(req.query.limit, 10);
+            const skip = (page - 1) * limit;
+            playersQuery = playersQuery.skip(skip).limit(limit);
+        } else {
+            const limit = parseInt(req.query.limit) || 10;
+            playersQuery = playersQuery.limit(limit);
+        }
+
+        const players = await playersQuery;
         res.json(players);
     } catch (error) {
         console.error(error);
