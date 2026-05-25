@@ -76,6 +76,28 @@ const getPlayers = async (req, res) => {
 
         let playersQuery = Player.find(filter);
 
+        if (req.query.sort) {
+            let sortField = "";
+            let sortOrder = -1; // Default descending for stats
+
+            switch (req.query.sort) {
+                case 'ovr': sortField = "OVR"; break;
+                case 'pace': sortField = "PAC"; break;
+                case 'shooting': sortField = "SHO"; break;
+                case 'passing': sortField = "PAS"; break;
+                case 'dribbling': sortField = "DRI"; break;
+                case 'defending': sortField = "DEF"; break;
+                case 'physical': sortField = "PHY"; break;
+                case 'age': sortField = "Age"; sortOrder = 1; break; // usually sort age ascending by default
+                case 'rank': sortField = "Rank"; sortOrder = 1; break; // rank 1 is best
+                case 'name': sortField = "Name"; sortOrder = 1; break;
+            }
+
+            if (sortField) {
+                playersQuery = playersQuery.sort({ [sortField]: sortOrder }).collation({ locale: "en_US", numericOrdering: true });
+            }
+        }
+
         let page, limit;
         if (req.query.page && req.query.limit) {
             page = parseInt(req.query.page, 10);
@@ -106,6 +128,68 @@ const getPlayers = async (req, res) => {
             success: false,
             message: error.message
         });
+    }
+};
+
+
+
+// ================= GET PLAYERS SORTED =================
+const getPlayersSorted = async (req, res) => {
+    try {
+        const fieldAndOrder = req.params.fieldAndOrder;
+        const parts = fieldAndOrder.split('-');
+        if (parts.length !== 2) {
+            return res.status(400).json({ success: false, message: "Invalid sort format. Expected field-order (e.g. ovr-desc)" });
+        }
+        
+        const field = parts[0];
+        const orderStr = parts[1];
+        
+        let sortField = "";
+        switch (field) {
+            case 'ovr': sortField = "OVR"; break;
+            case 'pace': sortField = "PAC"; break;
+            case 'shooting': sortField = "SHO"; break;
+            case 'passing': sortField = "PAS"; break;
+            case 'dribbling': sortField = "DRI"; break;
+            case 'defending': sortField = "DEF"; break;
+            case 'physical': sortField = "PHY"; break;
+            case 'age': sortField = "Age"; break;
+            case 'rank': sortField = "Rank"; break;
+            case 'name': sortField = "Name"; break;
+            default: sortField = field;
+        }
+
+        const sortOrder = orderStr === 'desc' ? -1 : 1;
+
+        let playersQuery = Player.find({}).sort({ [sortField]: sortOrder }).collation({ locale: "en_US", numericOrdering: true });
+        
+        let page, limit;
+        if (req.query.page && req.query.limit) {
+            page = parseInt(req.query.page, 10);
+            limit = parseInt(req.query.limit, 10);
+            const skip = (page - 1) * limit;
+            playersQuery = playersQuery.skip(skip).limit(limit);
+        }
+
+        const players = await playersQuery;
+        
+        const responseData = {
+            success: true,
+            count: players.length,
+            data: players
+        };
+        
+        if (page && limit) {
+            responseData.page = page;
+            responseData.limit = limit;
+        }
+
+        return res.status(200).json(responseData);
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -453,5 +537,6 @@ module.exports = {
     updatePlayer,
     bulkUpdatePlayers,
     deletePlayer,
-    bulkDeletePlayers
+    bulkDeletePlayers,
+    getPlayersSorted
 };
