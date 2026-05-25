@@ -3,7 +3,47 @@ const mongoose = require('mongoose');
 
 const getPlayers = async (req, res) => {
     try {
-        const players = await Player.find({});
+        const filter = {};
+
+        if (req.query.ovr) {
+            filter.ovr = req.query.ovr;
+        }
+
+        const exprConditions = [];
+
+        if (req.query.minPace) {
+            const target = Number(req.query.minPace);
+            if (!isNaN(target)) {
+                exprConditions.push({ $gte: [{ $toDouble: "$pac" }, target] });
+            }
+        }
+
+        if (req.query.minShooting) {
+            const target = Number(req.query.minShooting);
+            if (!isNaN(target)) {
+                exprConditions.push({ $gte: [{ $toDouble: "$sho" }, target] });
+            }
+        }
+
+        if (req.query.minPassing) {
+            const target = Number(req.query.minPassing);
+            if (!isNaN(target)) {
+                exprConditions.push({ $gte: [{ $toDouble: "$pas" }, target] });
+            }
+        }
+
+        if (req.query.minDribbling) {
+            const target = Number(req.query.minDribbling);
+            if (!isNaN(target)) {
+                exprConditions.push({ $gte: [{ $toDouble: "$dri" }, target] });
+            }
+        }
+
+        if (exprConditions.length > 0) {
+            filter.$expr = { $and: exprConditions };
+        }
+
+        const players = await Player.find(filter);
         res.json(players);
     } catch (error) {
         console.error(error);
