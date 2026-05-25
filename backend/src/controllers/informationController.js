@@ -13,14 +13,14 @@ const getPlayerByName = async (req, res) => {
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Server Error fetching player details by name' });
+        res.status(500).json({ message: error.message });
     }
 };
 
 const getPlayerByRank = async (req, res) => {
     try {
         const rank = req.params.rank;
-        const player = await Player.findOne({ rank });
+        const player = await Player.findOne({ rank : rank });
         if (player) {
             res.json(player);
         } else {
@@ -35,7 +35,7 @@ const getPlayerByRank = async (req, res) => {
 const getPlayersByTeam = async (req, res) => {
     try {
         const team = req.params.team;
-        const players = await Player.find({ team: { $regex: new RegExp(`^${team}$`, 'i') } });
+        const players = await Player.find({ team: team });
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -46,7 +46,7 @@ const getPlayersByTeam = async (req, res) => {
 const getPlayersByLeague = async (req, res) => {
     try {
         const league = req.params.league;
-        const players = await Player.find({ league: { $regex: new RegExp(`^${league}$`, 'i') } });
+        const players = await Player.find({ league: league });
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -342,6 +342,122 @@ const getRecentPlayers = async (req, res) => {
     }
 };
 
+const getPlayersBySkillMoves = async (req, res) => {
+    try {
+        const players = await Player.find({ skillMoves: req.params.value });
+        res.json(players);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error fetching players by skill moves' });
+    }
+};
+
+const getPlayersByWeakFoot = async (req, res) => {
+    try {
+        const players = await Player.find({ weakFoot: req.params.value });
+        res.json(players);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error fetching players by weak foot' });
+    }
+};
+
+const comparePlayers = async (req, res) => {
+    try {
+        const { player1, player2 } = req.params;
+        const p1 = mongoose.Types.ObjectId.isValid(player1)
+            ? await Player.findById(player1)
+            : await Player.findOne({ ID: player1 });
+        const p2 = mongoose.Types.ObjectId.isValid(player2)
+            ? await Player.findById(player2)
+            : await Player.findOne({ ID: player2 });
+        
+        if (!p1 || !p2) {
+            return res.status(404).json({ message: 'One or both players not found' });
+        }
+
+        // Calculate raw numerical difference comparisons
+        const compareStat = (s1, s2) => (Number(s1) || 0) - (Number(s2) || 0);
+
+        res.json({
+            player1: p1,
+            player2: p2,
+            comparison: {
+                ovrDifference: compareStat(p1.ovr, p2.ovr),
+                pacDifference: compareStat(p1.pac, p2.pac),
+                shoDifference: compareStat(p1.sho, p2.sho),
+                pasDifference: compareStat(p1.pas, p2.pas),
+                driDifference: compareStat(p1.dri, p2.dri),
+                defDifference: compareStat(p1.def, p2.def),
+                phyDifference: compareStat(p1.phy, p2.phy)
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error comparing players' });
+    }
+};
+
+const getPlayerPerformance = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const player = mongoose.Types.ObjectId.isValid(id)
+            ? await Player.findById(id)
+            : await Player.findOne({ ID: id });
+
+        if (!player) {
+            return res.status(404).json({ message: 'Player not found' });
+        }
+
+        const getAvg = (arr) => arr.reduce((acc, curr) => acc + (Number(curr) || 0), 0) / arr.length;
+        
+        const isGK = player.position && player.position.toUpperCase() === 'GK';
+        const calculatedScore = isGK
+            ? getAvg([player.gkDiving, player.gkHandling, player.gkKicking, player.gkPositioning, player.gkReflexes])
+            : getAvg([player.pac, player.sho, player.pas, player.dri, player.def, player.phy]);
+
+        res.json({
+            player,
+            analytics: {
+                type: isGK ? 'Goalkeeper' : 'Outfield',
+                performanceScore: Math.round(calculatedScore * 100) / 100
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error fetching player performance analytics' });
+    }
+};
+
+const getPlayerStats = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const player = mongoose.Types.ObjectId.isValid(id)
+            ? await Player.findById(id)
+            : await Player.findOne({ ID: id });
+
+        if (!player) {
+            return res.status(404).json({ message: 'Player not found' });
+        }
+
+        res.json({
+            player,
+            stats: {
+                pace: { acceleration: player.acceleration, sprintSpeed: player.sprintSpeed },
+                shooting: { positioning: player.positioning, finishing: player.finishing, shotPower: player.shotPower, longShots: player.longShots, volleys: player.volleys, penalties: player.penalties },
+                passing: { vision: player.vision, crossing: player.crossing, freeKickAccuracy: player.freeKickAccuracy, shortPassing: player.shortPassing, longPassing: player.longPassing, curve: player.curve },
+                dribbling: { dribbling: player.dribbling, agility: player.agility, balance: player.balance, reactions: player.reactions, ballControl: player.ballControl, composure: player.composure },
+                defending: { interceptions: player.interceptions, headingAccuracy: player.headingAccuracy, defAwareness: player.defAwareness, standingTackle: player.standingTackle, slidingTackle: player.slidingTackle },
+                physical: { jumping: player.jumping, stamina: player.stamina, strength: player.strength, aggression: player.aggression },
+                goalkeeping: { diving: player.gkDiving, handling: player.gkHandling, kicking: player.gkKicking, positioning: player.gkPositioning, reflexes: player.gkReflexes }
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error fetching complete player statistics' });
+    }
+};
+
 module.exports = {
     getPlayerByName,
     getPlayerByRank,
@@ -362,5 +478,11 @@ module.exports = {
     getTopDefenders,
     getTopPhysicalPlayers,
     getTopYoungsters,
-    getRecentPlayers
+    getRecentPlayers,
+    getPlayersBySkillMoves,
+    getPlayersByWeakFoot,
+    comparePlayers,
+    getPlayerPerformance,
+    getPlayerStats
 };
+
