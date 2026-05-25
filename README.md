@@ -327,7 +327,11 @@ GET /search/players?q=mbappe
 ## Filter Players
 
 ```http
+GET /players?minDefending=80
+GET /players?minPhysical=80
+GET /players?team=Liverpool
 GET /players?league=Premier League
+GET /players?nation=France
 ```
 
 ## Pagination

@@ -9,6 +9,18 @@ const getPlayers = async (req, res) => {
             filter.ovr = req.query.ovr;
         }
 
+        if (req.query.team) {
+            filter.team = req.query.team;
+        }
+
+        if (req.query.league) {
+            filter.league = req.query.league;
+        }
+
+        if (req.query.nation) {
+            filter.nation = req.query.nation;
+        }
+
         const exprConditions = [];
 
         if (req.query.minPace) {
@@ -36,6 +48,20 @@ const getPlayers = async (req, res) => {
             const target = Number(req.query.minDribbling);
             if (!isNaN(target)) {
                 exprConditions.push({ $gte: [{ $toDouble: "$dri" }, target] });
+            }
+        }
+
+        if (req.query.minDefending) {
+            const target = Number(req.query.minDefending);
+            if (!isNaN(target)) {
+                exprConditions.push({ $gte: [{ $toDouble: "$def" }, target] });
+            }
+        }
+
+        if (req.query.minPhysical) {
+            const target = Number(req.query.minPhysical);
+            if (!isNaN(target)) {
+                exprConditions.push({ $gte: [{ $toDouble: "$phy" }, target] });
             }
         }
 
