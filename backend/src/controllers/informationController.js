@@ -21,7 +21,7 @@ const getPlayerByRank = async (req, res) => {
     try {
         const rank = req.params.rank;
 
-        const player = await Player.findOne({ rank });
+        const player = await Player.findOne({ Rank: rank });
 
         if (!player) {
             return res.status(404).json({
@@ -43,7 +43,7 @@ const getPlayerByRank = async (req, res) => {
 const getPlayersByTeam = async (req, res) => {
     try {
         const team = req.params.team;
-        const players = await Player.find({ team: team });
+        const players = await Player.find({ Team: team });
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -54,7 +54,7 @@ const getPlayersByTeam = async (req, res) => {
 const getPlayersByLeague = async (req, res) => {
     try {
         const league = req.params.league;
-        const players = await Player.find({ league: league });
+        const players = await Player.find({ League: league });
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -65,7 +65,7 @@ const getPlayersByLeague = async (req, res) => {
 const getPlayersByNation = async (req, res) => {
     try {
         const nation = req.params.nation;
-        const players = await Player.find({ nation: nation });
+        const players = await Player.find({ Nation: nation });
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -76,7 +76,7 @@ const getPlayersByNation = async (req, res) => {
 const getPlayersByPosition = async (req, res) => {
     try {
         const position = req.params.position;
-        const players = await Player.find({ position: position });
+        const players = await Player.find({ Position: position });
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -87,7 +87,7 @@ const getPlayersByPosition = async (req, res) => {
 const getPlayersByAge = async (req, res) => {
     try {
         const age = req.params.age;
-        const players = await Player.find({ age });
+        const players = await Player.find({ Age: age });
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -98,7 +98,7 @@ const getPlayersByAge = async (req, res) => {
 const getPlayersByGender = async (req, res) => {
     try {
         const gender = req.params.gender;
-        const players = await Player.find({ gender: gender });
+        const players = await Player.find({ GENDER: gender });
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -109,7 +109,7 @@ const getPlayersByGender = async (req, res) => {
 const getPlayersByPlaystyle = async (req, res) => {
     try {
         const style = req.params.style;
-        const players = await Player.find({ playStyles: style });
+        const players = await Player.find({ "play style": style });
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -120,7 +120,7 @@ const getPlayersByPlaystyle = async (req, res) => {
 const getPlayersByPreferredFoot = async (req, res) => {
     try {
         const foot = req.params.foot;
-        const players = await Player.find({ preferredFoot: foot });
+        const players = await Player.find({ "Preferred foot": foot });
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -130,7 +130,7 @@ const getPlayersByPreferredFoot = async (req, res) => {
 const getPlayersByAlternativePosition = async (req, res) => {
     try {
         const position = req.params.position;
-        const players = await Player.find({ alternativePositions: position });
+        const players = await Player.find({ "Alternative positions": position });
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -144,12 +144,12 @@ const getTopRatedPlayers = async (req, res) => {
         const players = await Player.aggregate([
             {
                 $match: {
-                    ovr: { $exists: true, $ne: null, $ne: "" }
+                    OVR: { $exists: true, $ne: null, $ne: "" }
                 }
             },
             {
                 $addFields: {
-                    ovrNum: { $toDouble: "$ovr" }
+                    ovrNum: { $toDouble: "$OVR" }
                 }
             },
             { $sort: { ovrNum: -1 } },
@@ -168,12 +168,12 @@ const getTopPacedPlayers = async (req, res) => {
         const players = await Player.aggregate([
             {
                 $match: {
-                    pac: { $exists: true, $ne: null, $ne: "" }
+                    PAC: { $exists: true, $ne: null, $ne: "" }
                 }
             },
             {
                 $addFields: {
-                    pacNum: { $toDouble: "$pac" }
+                    pacNum: { $toDouble: "$PAC" }
                 }
             },
             { $sort: { pacNum: -1 } },
@@ -192,12 +192,12 @@ const getTopDribblers = async (req, res) => {
         const players = await Player.aggregate([
             {
                 $match: {
-                    dri: { $exists: true, $ne: null, $ne: "" }
+                    DRI: { $exists: true, $ne: null, $ne: "" }
                 }
             },
             {
                 $addFields: {
-                    driNum: { $toDouble: "$dri" }
+                    driNum: { $toDouble: "$DRI" }
                 }
             },
             { $sort: { driNum: -1 } },
@@ -216,12 +216,12 @@ const getTopFinishers = async (req, res) => {
         const players = await Player.aggregate([
             {
                 $match: {
-                    finishing: { $exists: true, $ne: null, $ne: "" }
+                    Finishing: { $exists: true, $ne: null, $ne: "" }
                 }
             },
             {
                 $addFields: {
-                    finishingNum: { $toDouble: "$finishing" }
+                    finishingNum: { $toDouble: "$Finishing" }
                 }
             },
             { $sort: { finishingNum: -1 } },
@@ -240,12 +240,12 @@ const getTopPassers = async (req, res) => {
         const players = await Player.aggregate([
             {
                 $match: {
-                    pas: { $exists: true, $ne: null, $ne: "" }
+                    PAS: { $exists: true, $ne: null, $ne: "" }
                 }
             },
             {
                 $addFields: {
-                    pasNum: { $toDouble: "$pas" }
+                    pasNum: { $toDouble: "$PAS" }
                 }
             },
             { $sort: { pasNum: -1 } },
@@ -264,12 +264,12 @@ const getTopDefenders = async (req, res) => {
         const players = await Player.aggregate([
             {
                 $match: {
-                    def: { $exists: true, $ne: null, $ne: "" }
+                    DEF: { $exists: true, $ne: null, $ne: "" }
                 }
             },
             {
                 $addFields: {
-                    defNum: { $toDouble: "$def" }
+                    defNum: { $toDouble: "$DEF" }
                 }
             },
             { $sort: { defNum: -1 } },
@@ -288,12 +288,12 @@ const getTopPhysicalPlayers = async (req, res) => {
         const players = await Player.aggregate([
             {
                 $match: {
-                    phy: { $exists: true, $ne: null, $ne: "" }
+                    PHY: { $exists: true, $ne: null, $ne: "" }
                 }
             },
             {
                 $addFields: {
-                    phyNum: { $toDouble: "$phy" }
+                    phyNum: { $toDouble: "$PHY" }
                 }
             },
             { $sort: { phyNum: -1 } },
@@ -312,14 +312,14 @@ const getTopYoungsters = async (req, res) => {
         const players = await Player.aggregate([
             {
                 $match: {
-                    age: { $exists: true, $ne: null, $ne: "" },
-                    ovr: { $exists: true, $ne: null, $ne: "" }
+                    Age: { $exists: true, $ne: null, $ne: "" },
+                    OVR: { $exists: true, $ne: null, $ne: "" }
                 }
             },
             {
                 $addFields: {
-                    ageNum: { $toDouble: "$age" },
-                    ovrNum: { $toDouble: "$ovr" }
+                    ageNum: { $toDouble: "$Age" },
+                    ovrNum: { $toDouble: "$OVR" }
                 }
             },
             {
@@ -352,7 +352,7 @@ const getRecentPlayers = async (req, res) => {
 
 const getPlayersBySkillMoves = async (req, res) => {
     try {
-        const players = await Player.find({ skillMoves: req.params.value });
+        const players = await Player.find({ "Skill moves": req.params.value });
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -362,7 +362,7 @@ const getPlayersBySkillMoves = async (req, res) => {
 
 const getPlayersByWeakFoot = async (req, res) => {
     try {
-        const players = await Player.find({ weakFoot: req.params.value });
+        const players = await Player.find({ "Weak foot": req.params.value });
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -391,13 +391,13 @@ const comparePlayers = async (req, res) => {
             player1: p1,
             player2: p2,
             comparison: {
-                ovrDifference: compareStat(p1.ovr, p2.ovr),
-                pacDifference: compareStat(p1.pac, p2.pac),
-                shoDifference: compareStat(p1.sho, p2.sho),
-                pasDifference: compareStat(p1.pas, p2.pas),
-                driDifference: compareStat(p1.dri, p2.dri),
-                defDifference: compareStat(p1.def, p2.def),
-                phyDifference: compareStat(p1.phy, p2.phy)
+                ovrDifference: compareStat(p1.OVR, p2.OVR),
+                pacDifference: compareStat(p1.PAC, p2.PAC),
+                shoDifference: compareStat(p1.SHO, p2.SHO),
+                pasDifference: compareStat(p1.PAS, p2.PAS),
+                driDifference: compareStat(p1.DRI, p2.DRI),
+                defDifference: compareStat(p1.DEF, p2.DEF),
+                phyDifference: compareStat(p1.PHY, p2.PHY)
             }
         });
     } catch (error) {
@@ -419,10 +419,10 @@ const getPlayerPerformance = async (req, res) => {
 
         const getAvg = (arr) => arr.reduce((acc, curr) => acc + (Number(curr) || 0), 0) / arr.length;
         
-        const isGK = player.position && player.position.toUpperCase() === 'GK';
+        const isGK = player.Position && player.Position.toUpperCase() === 'GK';
         const calculatedScore = isGK
-            ? getAvg([player.gkDiving, player.gkHandling, player.gkKicking, player.gkPositioning, player.gkReflexes])
-            : getAvg([player.pac, player.sho, player.pas, player.dri, player.def, player.phy]);
+            ? getAvg([player["GK Diving"], player["GK Handling"], player["GK Kicking"], player["GK Positioning"], player["GK Reflexes"]])
+            : getAvg([player.PAC, player.SHO, player.PAS, player.DRI, player.DEF, player.PHY]);
 
         res.json({
             player,
@@ -451,13 +451,13 @@ const getPlayerStats = async (req, res) => {
         res.json({
             player,
             stats: {
-                pace: { acceleration: player.acceleration, sprintSpeed: player.sprintSpeed },
-                shooting: { positioning: player.positioning, finishing: player.finishing, shotPower: player.shotPower, longShots: player.longShots, volleys: player.volleys, penalties: player.penalties },
-                passing: { vision: player.vision, crossing: player.crossing, freeKickAccuracy: player.freeKickAccuracy, shortPassing: player.shortPassing, longPassing: player.longPassing, curve: player.curve },
-                dribbling: { dribbling: player.dribbling, agility: player.agility, balance: player.balance, reactions: player.reactions, ballControl: player.ballControl, composure: player.composure },
-                defending: { interceptions: player.interceptions, headingAccuracy: player.headingAccuracy, defAwareness: player.defAwareness, standingTackle: player.standingTackle, slidingTackle: player.slidingTackle },
-                physical: { jumping: player.jumping, stamina: player.stamina, strength: player.strength, aggression: player.aggression },
-                goalkeeping: { diving: player.gkDiving, handling: player.gkHandling, kicking: player.gkKicking, positioning: player.gkPositioning, reflexes: player.gkReflexes }
+                pace: { acceleration: player.Acceleration, sprintSpeed: player["Sprint Speed"] },
+                shooting: { positioning: player.Positioning, finishing: player.Finishing, shotPower: player["Shot Power"], longShots: player["Long Shots"], volleys: player.Volleys, penalties: player.Penalties },
+                passing: { vision: player.Vision, crossing: player.Crossing, freeKickAccuracy: player["Free Kick Accuracy"], shortPassing: player["Short Passing"], longPassing: player["Long Passing"], curve: player.Curve },
+                dribbling: { dribbling: player.Dribbling, agility: player.Agility, balance: player.Balance, reactions: player.Reactions, ballControl: player["Ball Control"], composure: player.Composure },
+                defending: { interceptions: player.Interceptions, headingAccuracy: player["Heading Accuracy"], defAwareness: player["Def Awareness"], standingTackle: player["Standing Tackle"], slidingTackle: player["Sliding Tackle"] },
+                physical: { jumping: player.Jumping, stamina: player.Stamina, strength: player.Strength, aggression: player.Aggression },
+                goalkeeping: { diving: player["GK Diving"], handling: player["GK Handling"], kicking: player["GK Kicking"], positioning: player["GK Positioning"], reflexes: player["GK Reflexes"] }
             }
         });
     } catch (error) {
@@ -493,4 +493,3 @@ module.exports = {
     getPlayerPerformance,
     getPlayerStats
 };
-
