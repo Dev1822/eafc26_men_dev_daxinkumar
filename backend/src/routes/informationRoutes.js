@@ -26,7 +26,8 @@ const {
     getPlayersByWeakFoot,
     comparePlayers,
     getPlayerPerformance,
-    getPlayerStats
+    getPlayerStats,
+    getFilteredPlayers
 } = require('../controllers/informationController');
 
 router.route('/name/:name').get(getPlayerByName);
@@ -54,5 +55,7 @@ router.route('/weak-foot/:value').get(getPlayersByWeakFoot);
 router.route('/compare/:player1/:player2').get(comparePlayers);
 router.route('/performance/:id').get(getPlayerPerformance);
 router.route('/stats/:id').get(getPlayerStats);
+
+router.route('/filter/:type').get(getFilteredPlayers);
 
 module.exports = router;

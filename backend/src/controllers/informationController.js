@@ -565,6 +565,105 @@ const getPlayerStats = async (req, res) => {
     }
 };
 
+const getFilteredPlayers = async (req, res) => {
+    try {
+        const type = req.params.type;
+        let filter = {};
+        let sortOption = {};
+        
+        switch (type) {
+            case 'high-rated':
+                filter.$expr = { $gte: [{ $toDouble: "$OVR" }, 85] };
+                sortOption = { "OVR": -1 };
+                break;
+            case 'low-rated':
+                filter.$expr = { $lte: [{ $toDouble: "$OVR" }, 65] };
+                sortOption = { "OVR": 1 };
+                break;
+            case 'high-pace':
+                filter.$expr = { $gte: [{ $toDouble: "$PAC" }, 88] };
+                sortOption = { "PAC": -1 };
+                break;
+            case 'high-shooting':
+                filter.$expr = { $gte: [{ $toDouble: "$SHO" }, 85] };
+                sortOption = { "SHO": -1 };
+                break;
+            case 'high-passing':
+                filter.$expr = { $gte: [{ $toDouble: "$PAS" }, 85] };
+                sortOption = { "PAS": -1 };
+                break;
+            case 'high-dribbling':
+                filter.$expr = { $gte: [{ $toDouble: "$DRI" }, 85] };
+                sortOption = { "DRI": -1 };
+                break;
+            case 'high-defending':
+                filter.$expr = { $gte: [{ $toDouble: "$DEF" }, 85] };
+                sortOption = { "DEF": -1 };
+                break;
+            case 'high-physical':
+                filter.$expr = { $gte: [{ $toDouble: "$PHY" }, 85] };
+                sortOption = { "PHY": -1 };
+                break;
+            case 'youngsters':
+                filter.$expr = { $lte: [{ $toDouble: "$Age" }, 23] };
+                sortOption = { "OVR": -1 };
+                break;
+            case 'veterans':
+                filter.$expr = { $gte: [{ $toDouble: "$Age" }, 33] };
+                sortOption = { "OVR": -1 };
+                break;
+            case 'left-footed':
+                filter["Preferred foot"] = "Left";
+                sortOption = { "OVR": -1 };
+                break;
+            case 'right-footed':
+                filter["Preferred foot"] = "Right";
+                sortOption = { "OVR": -1 };
+                break;
+            case 'five-star-skillers':
+                filter["Skill moves"] = "5";
+                sortOption = { "OVR": -1 };
+                break;
+            case 'top-finishers':
+                filter.$expr = { $gte: [{ $toDouble: "$Finishing" }, 85] };
+                sortOption = { "Finishing": -1 };
+                break;
+            case 'top-playmakers':
+                filter.$expr = { 
+                    $and: [
+                        { $gte: [{ $toDouble: "$Vision" }, 85] },
+                        { $gte: [{ $toDouble: "$PAS" }, 85] }
+                    ]
+                };
+                sortOption = { "Vision": -1 };
+                break;
+            default:
+                return res.status(400).json({ success: false, message: "Invalid filter type" });
+        }
+
+        let playersQuery = Player.find(filter);
+        if (Object.keys(sortOption).length > 0) {
+            playersQuery = playersQuery.sort(sortOption).collation({ locale: "en_US", numericOrdering: true });
+        }
+
+        if (req.query.page && req.query.limit) {
+            const page = parseInt(req.query.page, 10);
+            const limit = parseInt(req.query.limit, 10);
+            const skip = (page - 1) * limit;
+            playersQuery = playersQuery.skip(skip).limit(limit);
+        } else {
+            playersQuery = playersQuery.limit(parseInt(req.query.limit) || 50);
+        }
+
+        const players = await playersQuery;
+        res.json(players);
+        
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error fetching filtered players' });
+    }
+};
+
 module.exports = {
     getPlayerByName,
     getPlayerByRank,
@@ -590,5 +689,6 @@ module.exports = {
     getPlayersByWeakFoot,
     comparePlayers,
     getPlayerPerformance,
-    getPlayerStats
+    getPlayerStats,
+    getFilteredPlayers
 };
