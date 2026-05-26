@@ -29,6 +29,17 @@ const getPlayers = async (req, res) => {
             filter["Weak foot"] = req.query.weakFoot;
         }
 
+        if (req.query.search) {
+            const searchRegex = new RegExp(req.query.search, 'i');
+            filter.$or = [
+                { Name: searchRegex },
+                { Team: searchRegex },
+                { Nation: searchRegex },
+                { League: searchRegex },
+                { "play style": searchRegex }
+            ];
+        }
+
         // Numeric Filters
         const exprConditions = [];
 
