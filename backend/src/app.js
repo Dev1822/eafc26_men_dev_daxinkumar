@@ -18,6 +18,14 @@ const errorHandler = require('./middlewares/errorHandler');
 const app=express();
 app.use(express.json())
 
+// Catch invalid JSON payloads globally (e.g. for bulk uploads)
+app.use((err, req, res, next) => {
+    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+        return res.status(400).json({ success: false, message: "Invalid JSON payload format" });
+    }
+    next(err);
+});
+
 app.use('/players', playerRoutes);
 app.use('/players', informationRoutes);
 app.use('/search', searchRoutes);

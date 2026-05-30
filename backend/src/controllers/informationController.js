@@ -60,6 +60,11 @@ const getPlayersByTeam = async (req, res) => {
         }
 
         const players = await playersQuery;
+        
+        if (players.length === 0) {
+            return res.status(404).json({ success: false, message: `No players found for team: ${team}` });
+        }
+        
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -80,6 +85,11 @@ const getPlayersByLeague = async (req, res) => {
         }
 
         const players = await playersQuery;
+        
+        if (players.length === 0) {
+            return res.status(404).json({ success: false, message: `No players found for league: ${league}` });
+        }
+        
         res.json(players);
     } catch (error) {
         console.error(error);
@@ -100,6 +110,11 @@ const getPlayersByNation = async (req, res) => {
         }
 
         const players = await playersQuery;
+        
+        if (players.length === 0) {
+            return res.status(404).json({ success: false, message: `No players found for nation: ${nation}` });
+        }
+        
         res.json(players);
     } catch (error) {
         console.error(error);

@@ -113,6 +113,11 @@ const getPlayers = async (req, res) => {
         if (req.query.page && req.query.limit) {
             page = parseInt(req.query.page, 10);
             limit = parseInt(req.query.limit, 10);
+            
+            if (page < 1 || limit < 1 || isNaN(page) || isNaN(limit)) {
+                return res.status(400).json({ success: false, message: "Page and limit must be positive integers" });
+            }
+
             const skip = (page - 1) * limit;
             playersQuery = playersQuery.skip(skip).limit(limit);
         }
@@ -179,6 +184,11 @@ const getPlayersSorted = async (req, res) => {
         if (req.query.page && req.query.limit) {
             page = parseInt(req.query.page, 10);
             limit = parseInt(req.query.limit, 10);
+            
+            if (page < 1 || limit < 1 || isNaN(page) || isNaN(limit)) {
+                return res.status(400).json({ success: false, message: "Page and limit must be positive integers" });
+            }
+
             const skip = (page - 1) * limit;
             playersQuery = playersQuery.skip(skip).limit(limit);
         }
@@ -390,10 +400,10 @@ const updatePlayer = async (req, res) => {
     try {
         const ID = req.params.id;
 
-        if (!req.body || Object.keys(req.body).length === 0) {
+        if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body) || Object.keys(req.body).length === 0) {
             return res.status(400).json({
                 success: false,
-                message: "No fields provided to update"
+                message: "Invalid update payload. Expected a non-empty JSON object."
             });
         }
 
