@@ -21,6 +21,13 @@ const getPlayerByRank = async (req, res) => {
     try {
         const rank = req.params.rank;
 
+        if (isNaN(rank) || Number(rank) <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid rank value. Rank must be a positive number."
+            });
+        }
+
         const player = await Player.findOne({ Rank: rank });
 
         if (!player) {
@@ -103,6 +110,15 @@ const getPlayersByNation = async (req, res) => {
 const getPlayersByPosition = async (req, res) => {
     try {
         const position = req.params.position;
+        
+        const validPositions = ['ST', 'RW', 'LW', 'CF', 'CAM', 'CM', 'CDM', 'RM', 'LM', 'CB', 'RB', 'LB', 'RWB', 'LWB', 'GK'];
+        if (!validPositions.includes(position.toUpperCase())) {
+            return res.status(400).json({ 
+                success: false, 
+                message: `Invalid position request: '${position}'. Expected a valid football position.` 
+            });
+        }
+
         let playersQuery = Player.find({ Position: position });
 
         if (req.query.page && req.query.limit) {
