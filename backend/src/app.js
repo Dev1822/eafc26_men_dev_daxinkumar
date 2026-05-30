@@ -9,6 +9,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const protectedRoutes = require('./routes/protectedRoutes');
 const middlewareRoutes = require('./routes/middlewareRoutes');
 const authRoutes = require('./routes/authRoutes');
+const jwtRoutes = require('./routes/jwtRoutes');
 
 const authMiddleware = require('./middlewares/auth');
 const loggerMiddleware = require('./middlewares/logger');
@@ -27,6 +28,7 @@ app.use('/admin', authMiddleware, adminRoutes);
 app.use('/protected', authMiddleware, protectedRoutes);
 app.use('/middleware', loggerMiddleware, middlewareRoutes);
 app.use('/auth', authRoutes);
+app.use('/jwt', jwtRoutes);
 
 // Global Error Handler MUST be the last middleware
 app.use(errorHandler);
