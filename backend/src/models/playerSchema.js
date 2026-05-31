@@ -1,5 +1,23 @@
 const mongoose = require('mongoose');
 
+const statValidator = {
+  validator: function(v) {
+    if (v === null || v === undefined || v === '') return false;
+    const num = Number(v);
+    return !isNaN(num) && num >= 1 && num <= 99;
+  },
+  message: props => `${props.value} is not a valid stat rating. Must be a numeric string between 1 and 99.`
+};
+
+const ageValidator = {
+  validator: function(v) {
+    if (v === null || v === undefined || v === '') return false;
+    const num = Number(v);
+    return !isNaN(num) && num >= 15 && num <= 55;
+  },
+  message: props => `${props.value} is not a valid age. Must be a numeric string between 15 and 55.`
+};
+
 const playerSchema = new mongoose.Schema(
   {
     ID: {
@@ -20,13 +38,13 @@ const playerSchema = new mongoose.Schema(
       enum: ["M", "F"],
     },
 
-    OVR: String,
-    PAC: String,
-    SHO: String,
-    PAS: String,
-    DRI: String,
-    DEF: String,
-    PHY: String,
+    OVR: { type: String, required: true, validate: statValidator },
+    PAC: { type: String, required: true, validate: statValidator },
+    SHO: { type: String, required: true, validate: statValidator },
+    PAS: { type: String, required: true, validate: statValidator },
+    DRI: { type: String, required: true, validate: statValidator },
+    DEF: { type: String, required: true, validate: statValidator },
+    PHY: { type: String, required: true, validate: statValidator },
 
     // Pace
     Acceleration: String,
@@ -83,7 +101,7 @@ const playerSchema = new mongoose.Schema(
 
     "Alternative positions": [String],
 
-    Age: String,
+    Age: { type: String, required: true, validate: ageValidator },
     Nation: String,
     League: String,
     Team: String,
