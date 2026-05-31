@@ -293,19 +293,6 @@ const createPlayer = async (req, res) => {
             });
         }
 
-        // Validate core numeric stats
-        const { OVR, PAC, SHO, PAS, DRI, DEF } = req.body;
-        const statsToValidate = { OVR, PAC, SHO, PAS, DRI, DEF };
-        
-        for (const [key, value] of Object.entries(statsToValidate)) {
-            if (value === undefined || value === null || value === '') {
-                return res.status(400).json({ success: false, message: `Validation Error: ${key} is required` });
-            }
-            const num = Number(value);
-            if (isNaN(num) || num < 1 || num > 99) {
-                return res.status(400).json({ success: false, message: `Validation Error: ${key} must be a number between 1 and 99` });
-            }
-        }
 
 
         const newPlayer = new Player({
