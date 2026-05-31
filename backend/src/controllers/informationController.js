@@ -966,6 +966,193 @@ const calculateChemistry = async (req, res) => {
     }
 };
 
+// ================= SYSTEM LOGS & ACTIVITY =================
+const { getLogs } = require('../middlewares/logger');
+
+const getSystemLogs = (req, res) => {
+    try {
+        const logs = getLogs();
+        res.status(200).json({ success: true, count: logs.length, data: logs });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error fetching logs' });
+    }
+};
+
+const getActivityLogs = (req, res) => {
+    try {
+        const logs = getLogs();
+        // Return only the last 20 activities
+        const recent = logs.slice(0, 20);
+        res.status(200).json({ success: true, count: recent.length, data: recent });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error fetching activity' });
+    }
+};
+
+// ================= LIVE SEARCH =================
+const getLiveSearch = async (req, res) => {
+    try {
+        const query = req.query.q;
+        if (!query) {
+            return res.status(200).json({ success: true, data: [] });
+        }
+        
+        const players = await Player.find({ Name: new RegExp(query, 'i') })
+            .select('ID Name OVR Team Nation Position -_id')
+            .sort({ OVR: -1 })
+            .limit(10);
+            
+        res.status(200).json({ success: true, count: players.length, data: players });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error fetching live search' });
+    }
+};
+
+// ================= HEATMAP =================
+const getHeatmap = async (req, res) => {
+    try {
+        const id = req.query.id;
+        if (!id) return res.status(400).json({ success: false, message: 'Player ID required via ?id=' });
+
+        const player = await Player.findOne({ ID: id });
+        if (!player) return res.status(404).json({ success: false, message: 'Player not found' });
+
+        const pos = player.Position ? player.Position.toUpperCase() : 'UNKNOWN';
+        
+        // Mock a 3x3 pitch matrix [Defense, Midfield, Attack]
+        let matrix = [
+            [0, 0, 0], // Defense (Left, Center, Right)
+            [0, 0, 0], // Midfield (Left, Center, Right)
+            [0, 0, 0]  // Attack (Left, Center, Right)
+        ];
+
+        if (pos.includes('CB') || pos === 'GK') matrix[0] = [1, 9, 1];
+        else if (pos.includes('LB') || pos.includes('LWB')) matrix[0] = [9, 2, 0];
+        else if (pos.includes('RB') || pos.includes('RWB')) matrix[0] = [0, 2, 9];
+        else if (pos === 'CDM') matrix[1] = [2, 8, 2];
+        else if (pos === 'CM') matrix[1] = [3, 8, 3];
+        else if (pos === 'CAM') matrix[1] = [4, 9, 4];
+        else if (pos === 'LM') matrix[1] = [9, 2, 0];
+        else if (pos === 'RM') matrix[1] = [0, 2, 9];
+        else if (pos === 'LW' || pos === 'LF') matrix[2] = [9, 3, 0];
+        else if (pos === 'RW' || pos === 'RF') matrix[2] = [0, 3, 9];
+        else if (pos === 'ST' || pos === 'CF') matrix[2] = [2, 9, 2];
+
+        res.status(200).json({
+            success: true,
+            player: player.Name,
+            position: pos,
+            heatmap: matrix
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error generating heatmap' });
+    }
+};
+
+// ================= TOP MONTHLY / YEARLY =================
+const getTopMonthlyPerformers = async (req, res) => {
+    try {
+        const players = await Player.aggregate([
+            { $addFields: { ovrNum: { $toDouble: "$OVR" } } },
+            { $match: { ovrNum: { $gte: 85 } } },
+            { $sample: { size: 10 } },
+            { $project: { ovrNum: 0 } }
+        ]);
+        
+        // Mocking form factor
+        const performers = players.map(p => ({
+            ...p,
+            formModifier: `+${Math.floor(Math.random() * 4) + 1} OVR`,
+            period: "Monthly"
+        }));
+
+        res.status(200).json({ success: true, data: performers });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error fetching monthly performers' });
+    }
+};
+
+const getTopYearlyPerformers = async (req, res) => {
+    try {
+        const players = await Player.aggregate([
+            { $addFields: { ovrNum: { $toDouble: "$OVR" } } },
+            { $match: { ovrNum: { $gte: 87 } } },
+            { $sample: { size: 10 } },
+            { $project: { ovrNum: 0 } }
+        ]);
+        
+        // Mocking form factor
+        const performers = players.map(p => ({
+            ...p,
+            formModifier: `+${Math.floor(Math.random() * 6) + 2} OVR`,
+            period: "Yearly"
+        }));
+
+        res.status(200).json({ success: true, data: performers });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error fetching yearly performers' });
+    }
+};
+
+// ================= ALERTS =================
+const getHighGrowthAlerts = async (req, res) => {
+    try {
+        const players = await Player.aggregate([
+            { $addFields: { ovrNum: { $toDouble: "$OVR" }, ageNum: { $toDouble: "$Age" } } },
+            { $match: { 
+                ageNum: { $lte: 22 },
+                ovrNum: { $gte: 75, $lte: 84 }
+            }},
+            { $sort: { ovrNum: -1 } },
+            { $limit: 20 },
+            { $project: { ovrNum: 0, ageNum: 0 } }
+        ]);
+        res.status(200).json({ success: true, data: players });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error fetching high growth alerts' });
+    }
+};
+
+const getTopPerformerAlerts = async (req, res) => {
+    try {
+        const players = await Player.aggregate([
+            { $addFields: { ovrNum: { $toDouble: "$OVR" } } },
+            { $match: { ovrNum: { $gte: 89 } } },
+            { $sort: { ovrNum: -1 } },
+            { $limit: 20 },
+            { $project: { ovrNum: 0 } }
+        ]);
+        res.status(200).json({ success: true, data: players });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error fetching top performer alerts' });
+    }
+};
+
+// ================= YOUNG TALENTS =================
+const getYoungTalents = async (req, res) => {
+    try {
+        const players = await Player.aggregate([
+            { $addFields: { ovrNum: { $toDouble: "$OVR" }, ageNum: { $toDouble: "$Age" } } },
+            { $match: { ageNum: { $lte: 21 } } },
+            { $sort: { ovrNum: -1 } },
+            { $limit: 20 },
+            { $project: { ovrNum: 0, ageNum: 0 } }
+        ]);
+        res.status(200).json({ success: true, data: players });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error fetching young talents' });
+    }
+};
+
 module.exports = {
     getPlayerByName,
     getPlayerByRank,
@@ -1000,5 +1187,14 @@ module.exports = {
     generateDreamTeam,
     buildCustomSquad,
     getPlayerRecommendations,
-    calculateChemistry
+    calculateChemistry,
+    getSystemLogs,
+    getActivityLogs,
+    getLiveSearch,
+    getHeatmap,
+    getTopMonthlyPerformers,
+    getTopYearlyPerformers,
+    getHighGrowthAlerts,
+    getTopPerformerAlerts,
+    getYoungTalents
 };
