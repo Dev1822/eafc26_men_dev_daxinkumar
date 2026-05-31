@@ -20,9 +20,16 @@ const {
     deleteSession
 } = require('../controllers/authController');
 
+const createRateLimiter = require('../middlewares/rateLimit');
+const strictAuthLimiter = createRateLimiter({
+    windowMs: 10 * 60 * 1000, // 10 minutes
+    maxRequests: 5,
+    message: "Too many authentication attempts. Please try again later."
+});
+
 // Public Routes
-router.post('/register', register);
-router.post('/login', login);
+router.post('/register', strictAuthLimiter, register);
+router.post('/login', strictAuthLimiter, login);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 

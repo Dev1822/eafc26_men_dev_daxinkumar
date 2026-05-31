@@ -14,6 +14,19 @@ const jwtRoutes = require('./routes/jwtRoutes');
 const authMiddleware = require('./middlewares/auth');
 const loggerMiddleware = require('./middlewares/logger');
 const errorHandler = require('./middlewares/errorHandler');
+const createRateLimiter = require('./middlewares/rateLimit');
+
+const strictAdminLimiter = createRateLimiter({
+    windowMs: 60 * 1000,
+    maxRequests: 20,
+    message: "Strict admin rate limit exceeded."
+});
+
+const moderateApiLimiter = createRateLimiter({
+    windowMs: 60 * 1000,
+    maxRequests: 30,
+    message: "Analytics rate limit exceeded."
+});
 
 const app=express();
 app.use(express.json())
@@ -29,10 +42,10 @@ app.use((err, req, res, next) => {
 app.use('/players', playerRoutes);
 app.use('/players', informationRoutes);
 app.use('/search', searchRoutes);
-app.use('/analytics/players', analyticsRoutes);
+app.use('/analytics/players', moderateApiLimiter, analyticsRoutes);
 app.use('/stats/players', statsRoutes);
 
-app.use('/admin', authMiddleware, adminRoutes);
+app.use('/admin', strictAdminLimiter, authMiddleware, adminRoutes);
 app.use('/protected', authMiddleware, protectedRoutes);
 app.use('/middleware', loggerMiddleware, middlewareRoutes);
 app.use('/auth', authRoutes);
