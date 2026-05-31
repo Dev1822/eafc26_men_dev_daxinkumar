@@ -84,6 +84,24 @@ const getGlobalStats = async (req, res) => {
     }
 };
 
+// ================= EXPLICIT HEAD HANDLERS =================
+const headStatsCount = async (req, res) => {
+    try {
+        const type = req.params.type;
+        if (type === 'count') {
+            const count = await Player.estimatedDocumentCount();
+            res.set('X-Stats-Count', count);
+            return res.status(200).end();
+        } else {
+            // For other types just return 200 to acknowledge the endpoint exists
+            return res.status(200).end();
+        }
+    } catch (error) {
+        return res.status(500).end();
+    }
+};
+
 module.exports = {
-    getGlobalStats
+    getGlobalStats,
+    headStatsCount
 };

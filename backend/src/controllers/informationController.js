@@ -1153,6 +1153,36 @@ const getYoungTalents = async (req, res) => {
     }
 };
 
+// ================= EXPLICIT HEAD HANDLERS =================
+const headPlayersByTeam = async (req, res) => {
+    try {
+        const team = req.params.team;
+        const exists = await Player.exists({ Team: new RegExp(`^${team}$`, 'i') });
+        if (exists) {
+            return res.status(200).end();
+        } else {
+            return res.status(404).end();
+        }
+    } catch (error) {
+        return res.status(500).end();
+    }
+};
+
+const headSystemHealth = (req, res) => {
+    try {
+        const mongoose = require('mongoose');
+        if (mongoose.connection.readyState === 1) {
+            res.set('X-System-Status', 'Healthy');
+            return res.status(200).end();
+        } else {
+            res.set('X-System-Status', 'Unhealthy');
+            return res.status(503).end();
+        }
+    } catch (error) {
+        return res.status(500).end();
+    }
+};
+
 module.exports = {
     getPlayerByName,
     getPlayerByRank,
@@ -1196,5 +1226,7 @@ module.exports = {
     getTopYearlyPerformers,
     getHighGrowthAlerts,
     getTopPerformerAlerts,
-    getYoungTalents
+    getYoungTalents,
+    headPlayersByTeam,
+    headSystemHealth
 };

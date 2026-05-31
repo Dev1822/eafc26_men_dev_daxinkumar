@@ -39,6 +39,7 @@ router.use(jwtAuth);
 router.post('/logout', logout);
 
 router.route('/profile')
+    .head((req, res) => res.status(200).end())
     .get(getProfile)
     .patch(updateProfile)
     .delete(deleteProfile);

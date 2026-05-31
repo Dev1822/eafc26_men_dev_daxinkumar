@@ -271,6 +271,32 @@ const checkPlayerExists = async (req, res) => {
 
 
 
+// ================= EXPLICIT HEAD HANDLERS =================
+const headPlayers = async (req, res) => {
+    try {
+        const count = await Player.estimatedDocumentCount();
+        res.set('X-Total-Count', count);
+        return res.status(200).end();
+    } catch (error) {
+        return res.status(500).end();
+    }
+};
+
+const headPlayerById = async (req, res) => {
+    try {
+        const exists = await Player.exists({ ID: req.params.id });
+        if (exists) {
+            return res.status(200).end();
+        } else {
+            return res.status(404).end();
+        }
+    } catch (error) {
+        return res.status(500).end();
+    }
+};
+
+
+
 // ================= CREATE PLAYER =================
 const createPlayer = async (req, res) => {
     try {
@@ -561,5 +587,7 @@ module.exports = {
     bulkUpdatePlayers,
     deletePlayer,
     bulkDeletePlayers,
-    getPlayersSorted
+    getPlayersSorted,
+    headPlayers,
+    headPlayerById
 };

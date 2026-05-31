@@ -11,7 +11,9 @@ const {
     bulkUpdatePlayers,
     deletePlayer,
     bulkDeletePlayers,
-    getPlayersSorted
+    getPlayersSorted,
+    headPlayers,
+    headPlayerById
 } = require('../controllers/playerController');
 
 const createRateLimiter = require('../middlewares/rateLimit');
@@ -28,17 +30,21 @@ const expensiveQueryLimiter = createRateLimiter({
     message: "Too many complex queries. Please try again later."
 });
 
+router.use(generalApiLimiter);
+
+router.route('/')
+    .head(headPlayers)
+    .get(getPlayers)
+    .post(createPlayer);
+
 router.route('/exists/:id').get(checkPlayerExists);
 router.route('/bulk-create').post(bulkCreatePlayers);
 router.route('/bulk-update').patch(bulkUpdatePlayers);
 router.route('/bulk-delete').delete(bulkDeletePlayers);
 router.route('/sort/:fieldAndOrder').get(getPlayersSorted);
 
-router.route('/')
-    .get(generalApiLimiter, getPlayers)
-    .post(createPlayer);
-
 router.route('/:id')
+    .head(headPlayerById)
     .get(getPlayerById)
     .put(replacePlayer)
     .patch(updatePlayer)
