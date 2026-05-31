@@ -35,7 +35,16 @@ const {
     generateDreamTeam,
     buildCustomSquad,
     getPlayerRecommendations,
-    calculateChemistry
+    calculateChemistry,
+    getSystemLogs,
+    getActivityLogs,
+    getLiveSearch,
+    getHeatmap,
+    getTopMonthlyPerformers,
+    getTopYearlyPerformers,
+    getHighGrowthAlerts,
+    getTopPerformerAlerts,
+    getYoungTalents
 } = require('../controllers/informationController');
 
 const createRateLimiter = require('../middlewares/rateLimit');
@@ -60,6 +69,17 @@ router.route('/market-value').get(moderateApiLimiter, getPlayerMarketValue);
 router.route('/dream-team').get(expensiveQueryLimiter, generateDreamTeam);
 router.route('/team-builder').get(expensiveQueryLimiter, buildCustomSquad);
 router.route('/chemistry').get(moderateApiLimiter, calculateChemistry).post(moderateApiLimiter, calculateChemistry);
+
+// New Analytics & Logging Routes
+router.route('/heatmap').get(moderateApiLimiter, getHeatmap);
+router.route('/performance/top-monthly').get(moderateApiLimiter, getTopMonthlyPerformers);
+router.route('/performance/top-yearly').get(moderateApiLimiter, getTopYearlyPerformers);
+router.route('/alerts/high-growth').get(moderateApiLimiter, getHighGrowthAlerts);
+router.route('/alerts/top-performers').get(moderateApiLimiter, getTopPerformerAlerts);
+router.route('/young-talents').get(moderateApiLimiter, getYoungTalents);
+router.route('/logs').get(moderateApiLimiter, getSystemLogs);
+router.route('/activity').get(moderateApiLimiter, getActivityLogs);
+router.route('/live-search').get(getLiveSearch); // Intentionally no strict limiter for snappy autocomplete, or moderate.
 
 router.route('/name/:name').get(getPlayerByName);
 router.route('/rank/:rank').get(getPlayerByRank);

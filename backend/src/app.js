@@ -12,7 +12,7 @@ const authRoutes = require('./routes/authRoutes');
 const jwtRoutes = require('./routes/jwtRoutes');
 
 const authMiddleware = require('./middlewares/auth');
-const loggerMiddleware = require('./middlewares/logger');
+const { logger: loggerMiddleware } = require('./middlewares/logger');
 const errorHandler = require('./middlewares/errorHandler');
 const createRateLimiter = require('./middlewares/rateLimit');
 
