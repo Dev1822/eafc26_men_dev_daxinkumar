@@ -10,6 +10,11 @@ const moderateApiLimiter = createRateLimiter({
     message: "Search API rate limit exceeded."
 });
 
-router.route('/players').get(moderateApiLimiter, searchPlayers);
+router.route('/players')
+    .options((req, res) => res.set({
+        'Allow': 'OPTIONS, GET',
+        'Access-Control-Allow-Methods': 'OPTIONS, GET'
+    }).status(204).end())
+    .get(moderateApiLimiter, searchPlayers);
 
 module.exports = router;
