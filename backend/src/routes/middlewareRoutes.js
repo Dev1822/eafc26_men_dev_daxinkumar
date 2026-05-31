@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 
 const auth = require('../middlewares/auth');
-const rateLimit = require('../middlewares/rateLimit');
+const createRateLimiter = require('../middlewares/rateLimit');
+const rateLimit = createRateLimiter({ maxRequests: 5 });
 const requestTime = require('../middlewares/requestTime');
 const roleCheck = require('../middlewares/roleCheck');
 const validation = require('../middlewares/validation');
