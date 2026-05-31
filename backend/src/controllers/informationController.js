@@ -695,6 +695,277 @@ const getFilteredPlayers = async (req, res) => {
     }
 };
 
+// ================= RANDOM PLAYER =================
+const getRandomPlayer = async (req, res) => {
+    try {
+        const players = await Player.aggregate([{ $sample: { size: 1 } }]);
+        if (!players || players.length === 0) {
+            return res.status(404).json({ success: false, message: 'No players found in database' });
+        }
+        res.status(200).json({ success: true, data: players[0] });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error fetching random player' });
+    }
+};
+
+// ================= TRENDING PLAYERS =================
+const getTrendingPlayers = async (req, res) => {
+    try {
+        // Simulating "trending" by grabbing 10 random highly rated players (OVR >= 85)
+        const trendingPlayers = await Player.aggregate([
+            { $addFields: { ovrNum: { $toDouble: "$OVR" } } },
+            { $match: { ovrNum: { $gte: 85 } } },
+            { $sample: { size: 10 } },
+            { $project: { ovrNum: 0 } }
+        ]);
+        res.status(200).json({ success: true, data: trendingPlayers });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error fetching trending players' });
+    }
+};
+
+// ================= PLAYER PREDICTIONS =================
+const getPlayerPredictions = async (req, res) => {
+    try {
+        const id = req.query.id;
+        if (!id) return res.status(400).json({ success: false, message: 'Player ID required via ?id=' });
+
+        const player = await Player.findOne({ ID: id });
+        if (!player) return res.status(404).json({ success: false, message: 'Player not found' });
+
+        const age = Number(player.Age);
+        const ovr = Number(player.OVR);
+        
+        let growthTrend = "Stable";
+        let predictedOvr = ovr;
+
+        if (age < 24) {
+            growthTrend = "High Growth";
+            predictedOvr = ovr + Math.floor(Math.random() * 4) + 2; // +2 to +5
+        } else if (age >= 24 && age <= 29) {
+            growthTrend = "Peak";
+            predictedOvr = ovr + (Math.random() > 0.5 ? 1 : 0);
+        } else {
+            growthTrend = "Decline";
+            predictedOvr = ovr - Math.floor(Math.random() * 3) - 1; // -1 to -3
+        }
+
+        if (predictedOvr > 99) predictedOvr = 99;
+
+        res.status(200).json({
+            success: true,
+            data: {
+                player: player.Name,
+                currentAge: age,
+                currentOvr: ovr,
+                growthTrend,
+                predictedOvrNextSeason: predictedOvr
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error calculating predictions' });
+    }
+};
+
+// ================= ESTIMATE MARKET VALUE =================
+const getPlayerMarketValue = async (req, res) => {
+    try {
+        const id = req.query.id;
+        if (!id) return res.status(400).json({ success: false, message: 'Player ID required via ?id=' });
+
+        const player = await Player.findOne({ ID: id });
+        if (!player) return res.status(404).json({ success: false, message: 'Player not found' });
+
+        const age = Number(player.Age);
+        const ovr = Number(player.OVR);
+        
+        // Base market value scaling exponentially with OVR
+        let baseValue = Math.pow(1.2, ovr - 60) * 500000;
+        
+        // Age Multiplier
+        let ageMultiplier = 1;
+        if (age <= 21) ageMultiplier = 1.5;
+        else if (age <= 24) ageMultiplier = 1.2;
+        else if (age >= 30 && age < 33) ageMultiplier = 0.7;
+        else if (age >= 33) ageMultiplier = 0.4;
+
+        let finalValue = Math.round((baseValue * ageMultiplier) / 100000) * 100000; // Round to nearest 100k
+        
+        if (finalValue < 50000) finalValue = 50000;
+
+        res.status(200).json({
+            success: true,
+            data: {
+                player: player.Name,
+                ovr: ovr,
+                age: age,
+                estimatedMarketValue: finalValue,
+                currency: "Abstract"
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error calculating market value' });
+    }
+};
+
+// ================= DREAM TEAM GENERATOR =================
+const generateDreamTeam = async (req, res) => {
+    try {
+        // Standard 4-3-3: GK, LB, CB, CB, RB, CM, CM, CM, LW, ST, RW
+        const positions = ['GK', 'LB', 'CB', 'RB', 'CM', 'LW', 'ST', 'RW']; // simplified distinct positions
+        const team = {};
+
+        for (const pos of positions) {
+            const limit = (pos === 'CB') ? 2 : (pos === 'CM') ? 3 : 1;
+            
+            // Allow CAM/CDM for CM
+            let matchRegex = new RegExp(`^${pos}$`, 'i');
+            if (pos === 'CM') matchRegex = /^(CM|CAM|CDM)$/i;
+
+            const players = await Player.aggregate([
+                { $match: { Position: matchRegex } },
+                { $addFields: { ovrNum: { $toDouble: "$OVR" } } },
+                { $sort: { ovrNum: -1 } },
+                { $limit: limit },
+                { $project: { ovrNum: 0 } }
+            ]);
+            team[pos] = players;
+        }
+
+        res.status(200).json({ success: true, formation: "4-3-3", data: team });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error generating dream team' });
+    }
+};
+
+// ================= CUSTOM TEAM BUILDER =================
+const buildCustomSquad = async (req, res) => {
+    try {
+        const { league, nation, minOvr } = req.query;
+        let matchStage = {};
+        
+        if (league) matchStage.League = new RegExp(league, 'i');
+        if (nation) matchStage.Nation = new RegExp(nation, 'i');
+        if (minOvr) {
+            matchStage.$expr = { $gte: [{ $toDouble: "$OVR" }, Number(minOvr)] };
+        }
+
+        const positions = ['GK', 'LB', 'CB', 'RB', 'CM', 'LW', 'ST', 'RW'];
+        const team = {};
+
+        for (const pos of positions) {
+            const limit = (pos === 'CB') ? 2 : (pos === 'CM') ? 3 : 1;
+            let matchRegex = new RegExp(`^${pos}$`, 'i');
+            if (pos === 'CM') matchRegex = /^(CM|CAM|CDM)$/i;
+
+            const finalMatch = { ...matchStage, Position: matchRegex };
+
+            const players = await Player.aggregate([
+                { $match: finalMatch },
+                { $addFields: { ovrNum: { $toDouble: "$OVR" } } },
+                { $sort: { ovrNum: -1 } },
+                { $limit: limit },
+                { $project: { ovrNum: 0 } }
+            ]);
+            team[pos] = players;
+        }
+
+        res.status(200).json({ success: true, data: team });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error building custom squad' });
+    }
+};
+
+// ================= RECOMMENDATIONS =================
+const getPlayerRecommendations = async (req, res) => {
+    try {
+        const id = req.query.similarTo;
+        if (!id) return res.status(400).json({ success: false, message: 'Player ID required via ?similarTo=' });
+
+        const player = await Player.findOne({ ID: id });
+        if (!player) return res.status(404).json({ success: false, message: 'Player not found' });
+
+        const ovr = Number(player.OVR);
+
+        const recommendations = await Player.aggregate([
+            { $match: { 
+                ID: { $ne: id },
+                Position: player.Position,
+                League: player.League
+            }},
+            { $addFields: { ovrNum: { $toDouble: "$OVR" } } },
+            { $match: { 
+                ovrNum: { $gte: ovr - 3, $lte: ovr + 3 }
+            }},
+            { $sort: { ovrNum: -1 } },
+            { $limit: 5 },
+            { $project: { ovrNum: 0 } }
+        ]);
+
+        res.status(200).json({ success: true, targetPlayer: player.Name, data: recommendations });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error fetching recommendations' });
+    }
+};
+
+// ================= CHEMISTRY ANALYTICS =================
+const calculateChemistry = async (req, res) => {
+    try {
+        let ids = [];
+        if (req.method === 'POST') {
+            ids = req.body.ids;
+        } else {
+            // GET method using query param ?ids=1,2,3
+            const idsString = req.query.ids;
+            if (idsString) ids = idsString.split(',');
+        }
+
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({ success: false, message: 'An array of player IDs is required via ?ids= or body.ids' });
+        }
+
+        const players = await Player.find({ ID: { $in: ids } });
+        if (players.length === 0) {
+            return res.status(404).json({ success: false, message: 'No players found for the provided IDs' });
+        }
+
+        let totalChemistry = 0;
+        const leagues = {};
+        const nations = {};
+        const teams = {};
+
+        // Tally occurrences
+        players.forEach(p => {
+            leagues[p.League] = (leagues[p.League] || 0) + 1;
+            nations[p.Nation] = (nations[p.Nation] || 0) + 1;
+            teams[p.Team] = (teams[p.Team] || 0) + 1;
+        });
+
+        Object.values(leagues).forEach(count => { if (count > 1) totalChemistry += (count * 1); });
+        Object.values(nations).forEach(count => { if (count > 1) totalChemistry += (count * 1); });
+        Object.values(teams).forEach(count => { if (count > 1) totalChemistry += (count * 2); });
+
+        if (totalChemistry > 100) totalChemistry = 100;
+
+        res.status(200).json({ 
+            success: true, 
+            playersAnalyzed: players.length, 
+            chemistryScore: totalChemistry,
+            maxPossible: 100
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error calculating chemistry' });
+    }
+};
+
 module.exports = {
     getPlayerByName,
     getPlayerByRank,
@@ -721,5 +992,13 @@ module.exports = {
     comparePlayers,
     getPlayerPerformance,
     getPlayerStats,
-    getFilteredPlayers
+    getFilteredPlayers,
+    getRandomPlayer,
+    getTrendingPlayers,
+    getPlayerPredictions,
+    getPlayerMarketValue,
+    generateDreamTeam,
+    buildCustomSquad,
+    getPlayerRecommendations,
+    calculateChemistry
 };

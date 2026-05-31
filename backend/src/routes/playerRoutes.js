@@ -28,10 +28,6 @@ const expensiveQueryLimiter = createRateLimiter({
     message: "Too many complex queries. Please try again later."
 });
 
-router.route('/random').get(expensiveQueryLimiter, (req, res) => {
-    res.json({ success: true, message: "Random player endpoint (Stub)" });
-});
-
 router.route('/exists/:id').get(checkPlayerExists);
 router.route('/bulk-create').post(bulkCreatePlayers);
 router.route('/bulk-update').patch(bulkUpdatePlayers);

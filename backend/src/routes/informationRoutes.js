@@ -27,7 +27,15 @@ const {
     comparePlayers,
     getPlayerPerformance,
     getPlayerStats,
-    getFilteredPlayers
+    getFilteredPlayers,
+    getRandomPlayer,
+    getTrendingPlayers,
+    getPlayerPredictions,
+    getPlayerMarketValue,
+    generateDreamTeam,
+    buildCustomSquad,
+    getPlayerRecommendations,
+    calculateChemistry
 } = require('../controllers/informationController');
 
 const createRateLimiter = require('../middlewares/rateLimit');
@@ -44,8 +52,14 @@ const expensiveQueryLimiter = createRateLimiter({
     message: "Complex query limit exceeded."
 });
 
-router.route('/recommendations').get(expensiveQueryLimiter, (req, res) => res.json({ success: true, message: "Recommendations (Stub)" }));
-router.route('/trending').get(moderateApiLimiter, (req, res) => res.json({ success: true, message: "Trending (Stub)" }));
+router.route('/random').get(expensiveQueryLimiter, getRandomPlayer);
+router.route('/trending').get(moderateApiLimiter, getTrendingPlayers);
+router.route('/recommendations').get(expensiveQueryLimiter, getPlayerRecommendations);
+router.route('/predictions').get(moderateApiLimiter, getPlayerPredictions);
+router.route('/market-value').get(moderateApiLimiter, getPlayerMarketValue);
+router.route('/dream-team').get(expensiveQueryLimiter, generateDreamTeam);
+router.route('/team-builder').get(expensiveQueryLimiter, buildCustomSquad);
+router.route('/chemistry').get(moderateApiLimiter, calculateChemistry).post(moderateApiLimiter, calculateChemistry);
 
 router.route('/name/:name').get(getPlayerByName);
 router.route('/rank/:rank').get(getPlayerByRank);
