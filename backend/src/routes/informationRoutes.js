@@ -44,7 +44,9 @@ const {
     getTopYearlyPerformers,
     getHighGrowthAlerts,
     getTopPerformerAlerts,
-    getYoungTalents
+    getYoungTalents,
+    headPlayersByTeam,
+    headSystemHealth
 } = require('../controllers/informationController');
 
 const createRateLimiter = require('../middlewares/rateLimit');
@@ -81,9 +83,11 @@ router.route('/logs').get(moderateApiLimiter, getSystemLogs);
 router.route('/activity').get(moderateApiLimiter, getActivityLogs);
 router.route('/live-search').get(getLiveSearch); // Intentionally no strict limiter for snappy autocomplete, or moderate.
 
+router.route('/system/health').head(headSystemHealth);
+
 router.route('/name/:name').get(getPlayerByName);
 router.route('/rank/:rank').get(getPlayerByRank);
-router.route('/team/:team').get(getPlayersByTeam);
+router.route('/team/:team').head(headPlayersByTeam).get(getPlayersByTeam);
 router.route('/league/:league').get(getPlayersByLeague);
 router.route('/nation/:nation').get(getPlayersByNation);
 router.route('/position/:position').get(getPlayersByPosition);

@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-const { getPlayerAnalytics } = require('../controllers/analyticsController');
+const { getPlayerAnalytics, headAnalyticsType } = require('../controllers/analyticsController');
 
-router.route('/:type').get(getPlayerAnalytics);
+router.route('/:type')
+    .head(headAnalyticsType)
+    .get(getPlayerAnalytics);
 
 module.exports = router;

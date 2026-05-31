@@ -87,6 +87,28 @@ const getPlayerAnalytics = async (req, res) => {
     }
 };
 
+// ================= EXPLICIT HEAD HANDLERS =================
+const headAnalyticsType = (req, res) => {
+    try {
+        const type = req.params.type;
+        const validTypes = [
+            'top-playstyles', 'top-teams', 'top-leagues', 'top-nations',
+            'skill-distribution', 'foot-distribution', 'position-distribution',
+            'top-rated', 'youngest', 'oldest', 'top-scorers',
+            'top-assisters', 'top-dribblers', 'top-defenders', 'top-physical'
+        ];
+        
+        if (validTypes.includes(type)) {
+            return res.status(200).end();
+        } else {
+            return res.status(404).end();
+        }
+    } catch (error) {
+        return res.status(500).end();
+    }
+};
+
 module.exports = {
-    getPlayerAnalytics
+    getPlayerAnalytics,
+    headAnalyticsType
 };

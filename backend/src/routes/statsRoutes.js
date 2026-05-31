@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-const { getGlobalStats } = require('../controllers/statsController');
+const { getGlobalStats, headStatsCount } = require('../controllers/statsController');
 
-router.route('/:type').get(getGlobalStats);
+router.route('/:type')
+    .head(headStatsCount)
+    .get(getGlobalStats);
 
 module.exports = router;
