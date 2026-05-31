@@ -9,7 +9,12 @@ router.route('/dashboard').get((req, res) => {
     res.json({ success: true, message: "Welcome to the admin dashboard." });
 });
 
-router.route('/players').get(getPlayers);
+router.route('/players')
+    .options((req, res) => res.set({
+        'Allow': 'OPTIONS, GET',
+        'Access-Control-Allow-Methods': 'OPTIONS, GET'
+    }).status(204).end())
+    .get(getPlayers);
 
 router.route('/stats').get((req, res, next) => {
     req.params.type = 'count';

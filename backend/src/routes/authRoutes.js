@@ -29,7 +29,12 @@ const strictAuthLimiter = createRateLimiter({
 
 // Public Routes
 router.post('/register', strictAuthLimiter, register);
-router.post('/login', strictAuthLimiter, login);
+router.route('/login')
+    .options((req, res) => res.set({
+        'Allow': 'OPTIONS, POST',
+        'Access-Control-Allow-Methods': 'OPTIONS, POST'
+    }).status(204).end())
+    .post(strictAuthLimiter, login);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 

@@ -83,7 +83,12 @@ router.route('/logs').get(moderateApiLimiter, getSystemLogs);
 router.route('/activity').get(moderateApiLimiter, getActivityLogs);
 router.route('/live-search').get(getLiveSearch); // Intentionally no strict limiter for snappy autocomplete, or moderate.
 
-router.route('/system/health').head(headSystemHealth);
+router.route('/system/health')
+    .options((req, res) => res.set({
+        'Allow': 'OPTIONS, HEAD',
+        'Access-Control-Allow-Methods': 'OPTIONS, HEAD'
+    }).status(204).end())
+    .head(headSystemHealth);
 
 router.route('/name/:name').get(getPlayerByName);
 router.route('/rank/:rank').get(getPlayerByRank);

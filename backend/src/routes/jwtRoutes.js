@@ -31,7 +31,12 @@ router.post('/refresh-token', refreshToken);
 router.delete('/revoke-token', revokeToken);
 
 // Protected endpoints
-router.get('/profile', getProfile);
+router.route('/profile')
+    .options((req, res) => res.set({
+        'Allow': 'OPTIONS, GET',
+        'Access-Control-Allow-Methods': 'OPTIONS, GET'
+    }).status(204).end())
+    .get(getProfile);
 router.get('/dashboard', getDashboard);
 router.get('/private-stats', getPrivateStats);
 router.get('/private-players', getPrivatePlayers);

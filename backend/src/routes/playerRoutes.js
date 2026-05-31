@@ -33,6 +33,10 @@ const expensiveQueryLimiter = createRateLimiter({
 router.use(generalApiLimiter);
 
 router.route('/')
+    .options((req, res) => res.set({
+        'Allow': 'OPTIONS, HEAD, GET, POST',
+        'Access-Control-Allow-Methods': 'OPTIONS, HEAD, GET, POST'
+    }).status(204).end())
     .head(headPlayers)
     .get(getPlayers)
     .post(createPlayer);
@@ -44,6 +48,10 @@ router.route('/bulk-delete').delete(bulkDeletePlayers);
 router.route('/sort/:fieldAndOrder').get(getPlayersSorted);
 
 router.route('/:id')
+    .options((req, res) => res.set({
+        'Allow': 'OPTIONS, HEAD, GET, PUT, PATCH, DELETE',
+        'Access-Control-Allow-Methods': 'OPTIONS, HEAD, GET, PUT, PATCH, DELETE'
+    }).status(204).end())
     .head(headPlayerById)
     .get(getPlayerById)
     .put(replacePlayer)
