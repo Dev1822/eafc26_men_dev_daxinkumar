@@ -39,8 +39,8 @@ app.use((err, req, res, next) => {
     next(err);
 });
 
-app.use('/players', playerRoutes);
 app.use('/players', informationRoutes);
+app.use('/players', playerRoutes);
 app.use('/search', searchRoutes);
 app.use('/analytics/players', moderateApiLimiter, analyticsRoutes);
 app.use('/stats/players', statsRoutes);
