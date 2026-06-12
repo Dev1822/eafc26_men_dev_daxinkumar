@@ -80,10 +80,14 @@ exports.login = async (req, res) => {
 
         const token = generateToken(user._id, sessionId);
 
+        const userObj = user.toObject();
+        delete userObj.password;
+
         res.status(200).json({
             success: true,
             message: "Logged in successfully.",
-            token
+            token,
+            data: { user: userObj }
         });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });

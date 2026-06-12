@@ -28,7 +28,9 @@ const moderateApiLimiter = createRateLimiter({
     message: "Analytics rate limit exceeded."
 });
 
+const cors = require('cors');
 const app=express();
+app.use(cors());
 app.use(express.json())
 
 // Catch invalid JSON payloads globally (e.g. for bulk uploads)

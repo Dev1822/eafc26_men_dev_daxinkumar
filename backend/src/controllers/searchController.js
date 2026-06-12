@@ -60,6 +60,7 @@ const searchPlayers = async (req, res) => {
         }
 
         let playersQuery = Player.find(filter);
+        const totalCount = await Player.countDocuments(filter);
 
         if (Object.keys(sortOption).length > 0) {
             playersQuery = playersQuery.sort(sortOption).collation({ locale: "en_US", numericOrdering: true });
@@ -79,6 +80,7 @@ const searchPlayers = async (req, res) => {
         const responseData = {
             success: true,
             count: players.length,
+            total: totalCount,
             data: players
         };
 

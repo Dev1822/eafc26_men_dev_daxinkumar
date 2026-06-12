@@ -22,8 +22,8 @@ const {
 
 const createRateLimiter = require('../middlewares/rateLimit');
 const strictAuthLimiter = createRateLimiter({
-    windowMs: 10 * 60 * 1000, // 10 minutes
-    maxRequests: 5,
+    windowMs: 10 * 1000, // 10 seconds for local dev
+    maxRequests: 500,
     message: "Too many authentication attempts. Please try again later."
 });
 

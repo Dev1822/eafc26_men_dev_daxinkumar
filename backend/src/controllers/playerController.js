@@ -86,6 +86,7 @@ const getPlayers = async (req, res) => {
         }
 
         let playersQuery = Player.find(filter);
+        const totalCount = await Player.countDocuments(filter);
 
         if (req.query.sort) {
             let sortField = "";
@@ -127,6 +128,7 @@ const getPlayers = async (req, res) => {
         const responseData = {
             success: true,
             count: players.length,
+            total: totalCount,
             data: players
         };
         
@@ -179,6 +181,7 @@ const getPlayersSorted = async (req, res) => {
         const sortOrder = orderStr === 'desc' ? -1 : 1;
 
         let playersQuery = Player.find({}).sort({ [sortField]: sortOrder }).collation({ locale: "en_US", numericOrdering: true });
+        const totalCount = await Player.countDocuments({});
         
         let page, limit;
         if (req.query.page && req.query.limit) {
@@ -198,6 +201,7 @@ const getPlayersSorted = async (req, res) => {
         const responseData = {
             success: true,
             count: players.length,
+            total: totalCount,
             data: players
         };
         
