@@ -40,7 +40,7 @@ const Login = () => {
   });
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-indigo-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 px-4">
       <Helmet>
         <title>Login | EAFC26 Admin</title>
       </Helmet>
@@ -48,7 +48,7 @@ const Login = () => {
       <div className="bg-white dark:bg-gray-800 p-8 sm:p-10 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.5)] w-full max-w-md transform transition-all duration-300 hover:scale-[1.01]">
         
         <div className="text-center mb-10">
-          <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">
+          <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">
             Welcome Back
           </h2>
           <p className="text-gray-500 dark:text-gray-400 mt-3 text-sm">Please sign in to access your dashboard</p>
@@ -99,7 +99,7 @@ const Login = () => {
           <button 
             type="submit" 
             disabled={formik.isSubmitting}
-            className="w-full flex justify-center py-3.5 px-4 rounded-xl shadow-lg shadow-indigo-500/30 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transform transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed dark:focus:ring-offset-gray-800"
+            className="w-full flex justify-center py-3.5 px-4 rounded-xl shadow-lg shadow-indigo-500/30 text-sm font-bold text-white bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transform transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed dark:focus:ring-offset-gray-800"
           >
             {formik.isSubmitting ? 'Signing in...' : 'Sign In'}
           </button>
