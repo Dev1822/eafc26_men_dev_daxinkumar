@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Database, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, Database, LogOut } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { logout } from "../../store/slices/authSlice";
 
@@ -15,7 +15,6 @@ const Sidebar = () => {
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Players', path: '/dashboard/players', icon: Users },
     { name: 'Analytics', path: '/dashboard/analytics', icon: Database },
-    { name: 'Settings', path: '/dashboard/settings', icon: Settings },
   ];
 
   return (
