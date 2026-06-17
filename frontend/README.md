@@ -1,16 +1,33 @@
-# React + Vite
+# EAFC26 Frontend Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is a premium, highly responsive admin dashboard built for managing the EAFC26 dataset, integrated tightly with a MongoDB/Express backend.
 
-Currently, two official plugins are available:
+## Tech Stack
+- **Framework**: React 19 / Vite
+- **Styling**: Tailwind CSS v4 + Material UI (MUI)
+- **State Management**: Redux Toolkit (Data, UI, and Auth slices)
+- **Routing**: React Router DOM v6
+- **Data Fetching**: Axios
+- **Form Handling**: Formik + Yup
+- **Charts**: Recharts
+- **SEO**: React Helmet Async
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Folder Structure
+- `src/components`: Reusable UI components (Layouts, SEO, Sidebar, Navbar).
+- `src/features`: Domain-specific components (PlayersTable, AnalyticsDashboard).
+- `src/pages`: Top-level route components with lazy loading.
+- `src/services`: Axios interceptors and global API config.
+- `src/store`: Redux store configuration and slices (`authSlice`, `dataSlice`).
 
-## React Compiler
+## Setup Instructions
+1. Ensure the Node.js environment is configured.
+2. Ensure the backend server is running on port `5000` (or update the Vite proxy in `vite.config.js`).
+3. Run `npm install` to install dependencies.
+4. Run `npm run dev` to start the Vite development server.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Features Implemented
+- Complete JWT Authentication flow (Login, Register, Session Storage)
+- Protected and Admin-specific Routes
+- Full CRUD operations with Modals for Player Management
+- Aggregation-based Analytics Charts (OVR Distribution, Top Nations)
+- SEO tags, Dark Mode, and Global Toast Notifications
