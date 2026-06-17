@@ -88,10 +88,10 @@ const getPlayers = async (req, res) => {
         let playersQuery = Player.find(filter);
 
         if (req.query.sort) {
-            let sortField = "";
-            let sortOrder = -1; // Default descending for stats
+            let sortField = req.query.sort;
+            let sortOrder = req.query.order === 'asc' ? 1 : -1;
 
-            switch (req.query.sort) {
+            switch (req.query.sort.toLowerCase()) {
                 case 'ovr': sortField = "OVR"; break;
                 case 'pace': sortField = "PAC"; break;
                 case 'shooting': sortField = "SHO"; break;
@@ -99,9 +99,13 @@ const getPlayers = async (req, res) => {
                 case 'dribbling': sortField = "DRI"; break;
                 case 'defending': sortField = "DEF"; break;
                 case 'physical': sortField = "PHY"; break;
-                case 'age': sortField = "Age"; sortOrder = 1; break; // usually sort age ascending by default
-                case 'rank': sortField = "Rank"; sortOrder = 1; break; // rank 1 is best
-                case 'name': sortField = "Name"; sortOrder = 1; break;
+                case 'age': sortField = "Age"; break; 
+                case 'rank': sortField = "Rank"; break; 
+                case 'name': sortField = "Name"; break;
+                case 'position': sortField = "Position"; break;
+                case 'team': sortField = "Team"; break;
+                case 'nation': sortField = "Nation"; break;
+                default: sortField = req.query.sort; break;
             }
 
             if (sortField) {

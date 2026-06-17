@@ -8,8 +8,9 @@ export const fetchPlayers = createAsyncThunk(
       let endpoint = `/players?page=${page}&limit=${limit}`;
       if (search) {
         endpoint = `/search/players?q=${search}&page=${page}&limit=${limit}`;
-      } else if (sort) {
-        endpoint = `/players/sort/${sort}?page=${page}&limit=${limit}`;
+        if (sort && sort.field) endpoint += `&sort=${sort.field}&order=${sort.order}`;
+      } else if (sort && sort.field) {
+        endpoint += `&sort=${sort.field}&order=${sort.order}`;
       }
       const response = await api.get(endpoint);
       return response.data;
