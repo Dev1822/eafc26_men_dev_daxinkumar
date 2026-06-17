@@ -29,7 +29,9 @@ const Sidebar = () => {
       <nav className="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = location.pathname.includes(item.path) || (item.path === '/dashboard' && location.pathname === '/dashboard');
+          const isActive = item.path === '/dashboard' 
+            ? location.pathname === '/dashboard' 
+            : location.pathname.startsWith(item.path);
           
           return (
             <Link
