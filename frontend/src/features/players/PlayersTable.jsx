@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { 
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
-  Paper, TablePagination, IconButton, Chip, TextField, InputAdornment, Button
+  Paper, TablePagination, IconButton, Chip, TextField, InputAdornment, Button, TableSortLabel
 } from '@mui/material';
 import { Edit2, Trash2, Search, Plus } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -17,6 +17,7 @@ const PlayersTable = () => {
   
   // Initialize searchTerm from URL if available
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  const [sortConfig, setSortConfig] = useState({ field: '', order: 'desc' });
   
   // Sync if URL changes externally (e.g., from Navbar)
   useEffect(() => {
@@ -40,10 +41,10 @@ const PlayersTable = () => {
         setSearchParams({}, { replace: true });
       }
       
-      dispatch(fetchPlayers({ page, limit, search: searchTerm }));
+      dispatch(fetchPlayers({ page, limit, search: searchTerm, sort: sortConfig }));
     }, 500);
     return () => clearTimeout(timer);
-  }, [dispatch, page, limit, searchTerm, setSearchParams]);
+  }, [dispatch, page, limit, searchTerm, sortConfig, setSearchParams]);
 
   const handleChangePage = (event, newPage) => {
     dispatch(setPage(newPage + 1)); // MUI pages are 0-indexed, our API is 1-indexed
@@ -69,12 +70,27 @@ const PlayersTable = () => {
     setModalOpen(true);
   };
 
+  const handleSort = (field) => {
+    setSortConfig((prev) => {
+      const isAsc = prev.field === field && prev.order === 'asc';
+      return { field, order: isAsc ? 'desc' : 'asc' };
+    });
+  };
+
   const getOvrColor = (ovr) => {
     if (ovr >= 90) return 'success';
     if (ovr >= 80) return 'primary';
     if (ovr >= 70) return 'warning';
     return 'error';
   };
+
+  const headCells = [
+    { id: 'Name', label: 'Name' },
+    { id: 'Position', label: 'Position' },
+    { id: 'OVR', label: 'OVR' },
+    { id: 'Team', label: 'Team' },
+    { id: 'Nation', label: 'Nation' }
+  ];
 
   return (
     <div className="space-y-4">
@@ -117,11 +133,18 @@ const PlayersTable = () => {
         <Table sx={{ minWidth: 650 }} aria-label="players table">
           <TableHead className="bg-gray-50 dark:bg-gray-700/50">
             <TableRow>
-              <TableCell className="font-semibold text-gray-600 dark:text-gray-300">Name</TableCell>
-              <TableCell className="font-semibold text-gray-600 dark:text-gray-300">Position</TableCell>
-              <TableCell className="font-semibold text-gray-600 dark:text-gray-300">OVR</TableCell>
-              <TableCell className="font-semibold text-gray-600 dark:text-gray-300">Team</TableCell>
-              <TableCell className="font-semibold text-gray-600 dark:text-gray-300">Nation</TableCell>
+              {headCells.map((headCell) => (
+                <TableCell key={headCell.id} className="font-semibold text-gray-600 dark:text-gray-300">
+                  <TableSortLabel
+                    active={sortConfig.field === headCell.id}
+                    direction={sortConfig.field === headCell.id ? sortConfig.order : 'asc'}
+                    onClick={() => handleSort(headCell.id)}
+                    sx={{ '& .MuiTableSortLabel-icon': { color: 'inherit !important' } }}
+                  >
+                    {headCell.label}
+                  </TableSortLabel>
+                </TableCell>
+              ))}
               <TableCell align="right" className="font-semibold text-gray-600 dark:text-gray-300">Actions</TableCell>
             </TableRow>
           </TableHead>

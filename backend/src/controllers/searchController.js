@@ -61,6 +61,20 @@ const searchPlayers = async (req, res) => {
 
         let playersQuery = Player.find(filter);
 
+        if (req.query.sort && Object.keys(sortOption).length === 0) {
+            let sortField = req.query.sort;
+            let sortOrder = req.query.order === 'asc' ? 1 : -1;
+            switch (req.query.sort.toLowerCase()) {
+                case 'ovr': sortField = "OVR"; break;
+                case 'name': sortField = "Name"; break;
+                case 'team': sortField = "Team"; break;
+                case 'nation': sortField = "Nation"; break;
+                case 'position': sortField = "Position"; break;
+                default: sortField = req.query.sort; break;
+            }
+            if (sortField) sortOption = { [sortField]: sortOrder };
+        }
+
         if (Object.keys(sortOption).length > 0) {
             playersQuery = playersQuery.sort(sortOption).collation({ locale: "en_US", numericOrdering: true });
         }
