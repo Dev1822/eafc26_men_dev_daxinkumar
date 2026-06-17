@@ -74,11 +74,13 @@ const searchPlayers = async (req, res) => {
             playersQuery = playersQuery.skip(skip).limit(limit);
         }
 
+        const totalCount = await Player.countDocuments(filter);
         const players = await playersQuery;
 
         const responseData = {
             success: true,
             count: players.length,
+            total: totalCount,
             data: players
         };
 

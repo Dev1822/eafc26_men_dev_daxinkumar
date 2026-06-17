@@ -10,7 +10,6 @@ const UserDashboard = lazy(() => import('./pages/Dashboard/UserDashboard'));
 const AdminDashboard = lazy(() => import('./pages/Dashboard/AdminDashboard'));
 const Players = lazy(() => import('./pages/Dashboard/Players'));
 const Analytics = lazy(() => import('./pages/Dashboard/Analytics'));
-const Settings = lazy(() => import('./pages/Dashboard/Settings'));
 const MainLayout = lazy(() => import('./components/Layout/MainLayout'));
 
 import { useEffect } from 'react';
@@ -73,7 +72,6 @@ function App() {
             <Route index element={<UserDashboard />} />
             <Route path="players" element={<Players />} />
             <Route path="analytics" element={<Analytics />} />
-            <Route path="settings" element={<Settings />} />
             
             {/* Admin Only Routes */}
             <Route path="admin" element={
