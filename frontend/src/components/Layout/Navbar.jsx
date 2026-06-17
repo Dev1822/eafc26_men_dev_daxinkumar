@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Sun, Moon, Bell, Search, User } from 'lucide-react';
+import { Sun, Moon, Search, User } from 'lucide-react';
 import { useSelector } from 'react-redux';
 
 const Navbar = () => {
@@ -53,10 +53,6 @@ const Navbar = () => {
           {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
         </button>
 
-        <button className="relative p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-full transition-all duration-200">
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white dark:ring-gray-800" />
-        </button>
 
         <div className="flex items-center space-x-3 border-l border-gray-200 dark:border-gray-700 pl-6 ml-2">
           <div className="hidden md:block text-right">
