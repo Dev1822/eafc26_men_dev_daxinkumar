@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:5000';
+const BASE_URL = 'https://eafc26-men-dev-daxinkumar.onrender.com';
 
 class FetchError extends Error {
   constructor(message, status, data) {
