@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Sun, Moon, Search, User } from 'lucide-react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const [isDark, setIsDark] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { user } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check initial theme
@@ -29,6 +32,13 @@ const Navbar = () => {
     }
   };
 
+  const handleSearch = (e) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      navigate(`/dashboard/players?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery(''); // Optional: clear search input after redirect
+    }
+  };
+
   return (
     <header className="h-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-sm border-b border-gray-100 dark:border-gray-700 flex items-center justify-between px-6 lg:px-10 sticky top-0 z-10 transition-colors duration-200">
       
@@ -41,6 +51,9 @@ const Navbar = () => {
             type="text"
             className="block w-full pl-10 pr-3 py-2 border border-gray-200 dark:border-gray-600 rounded-xl leading-5 bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all duration-200"
             placeholder="Search players, stats..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearch}
           />
         </div>
       </div>

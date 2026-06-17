@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
 import { 
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
   Paper, TablePagination, IconButton, Chip, TextField, InputAdornment, Button
@@ -12,7 +13,18 @@ import PlayerModal from './PlayerModal';
 const PlayersTable = () => {
   const dispatch = useDispatch();
   const { players, total, page, limit, loading } = useSelector((state) => state.data);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Initialize searchTerm from URL if available
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  
+  // Sync if URL changes externally (e.g., from Navbar)
+  useEffect(() => {
+    const query = searchParams.get('search') || '';
+    if (query !== searchTerm) {
+      setSearchTerm(query);
+    }
+  }, [searchParams]);
   
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
@@ -21,10 +33,17 @@ const PlayersTable = () => {
   useEffect(() => {
     // We add a debounce effect for search
     const timer = setTimeout(() => {
+      // Sync local search term back to URL params
+      if (searchTerm) {
+        setSearchParams({ search: searchTerm }, { replace: true });
+      } else {
+        setSearchParams({}, { replace: true });
+      }
+      
       dispatch(fetchPlayers({ page, limit, search: searchTerm }));
     }, 500);
     return () => clearTimeout(timer);
-  }, [dispatch, page, limit, searchTerm]);
+  }, [dispatch, page, limit, searchTerm, setSearchParams]);
 
   const handleChangePage = (event, newPage) => {
     dispatch(setPage(newPage + 1)); // MUI pages are 0-indexed, our API is 1-indexed
