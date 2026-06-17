@@ -1,12 +1,8 @@
 import React from 'react';
+import AnalyticsDashboard from '../../features/analytics/AnalyticsDashboard';
 
 const Analytics = () => {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Analytics</h1>
-      <p>Analytics view.</p>
-    </div>
-  );
+  return <AnalyticsDashboard />;
 };
 
 export default Analytics;
