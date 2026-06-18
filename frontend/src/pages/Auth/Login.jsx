@@ -80,7 +80,6 @@ const Login = () => {
           <div className="relative">
             <div className="flex justify-between items-center ml-1">
               <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Password</label>
-              <a href="#" className="text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">Forgot password?</a>
             </div>
             <input 
               type="password" 
