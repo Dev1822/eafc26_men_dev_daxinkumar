@@ -72,7 +72,7 @@ const Navbar = () => {
             <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 leading-tight">{user?.name || 'Admin User'}</p>
             <p className="text-xs text-gray-500 dark:text-gray-400">{user?.role || 'Administrator'}</p>
           </div>
-          <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-md">
+          <div className="h-10 w-10 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-md">
             <User className="h-5 w-5" />
           </div>
         </div>
